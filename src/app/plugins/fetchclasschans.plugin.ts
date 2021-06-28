@@ -1,5 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { MessageService } from '../../services/message.service';
 
 export default class FetchClassChannelsPlugin extends Plugin {
   public commandName: string = 'fetchclasschans';
@@ -17,7 +18,7 @@ export default class FetchClassChannelsPlugin extends Plugin {
     const response = ['Current classes:\n'];
     response.push(...this.container.classService.buildClassListText(ClassType.ALL));
     for (const r of response) {
-      await this.container.messageService.attemptDMUser(message, r);
+      await MessageService.attemptDMUser(message, r);
     }
   }
 }

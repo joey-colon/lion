@@ -7,7 +7,6 @@ import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
 import { JobService } from '../services/job.service';
-import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
@@ -47,7 +46,6 @@ export interface IPlugin {
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
   pluginService: PluginService;
-  messageService: MessageService;
   channelService: ChannelService;
   classService: ClassService;
   jobService: JobService;

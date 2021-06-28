@@ -2,6 +2,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
+import { MessageService } from '../../services/message.service';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
@@ -38,7 +39,7 @@ export default class MarketPlacePlugin extends Plugin {
   }
 
   private _handleAddMarket(message: IMessage) {
-    this.container.messageService.attemptDMUser(
+    MessageService.attemptDMUser(
       message,
       new MessageEmbed().setDescription(
         `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
@@ -67,7 +68,7 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const pages: MessageEmbed[] = this._createListingEmbed(chunks);
-    await this.container.messageService
+    await MessageService
       .sendPagedEmbed(message, pages)
       .then(async (sentMsg) => await this._deleteOldListingPost(message, sentMsg));
     await message.delete();

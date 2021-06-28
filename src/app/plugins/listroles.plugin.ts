@@ -2,6 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
 import { GuildService } from '../../services/guild.service';
+import { MessageService } from '../../services/message.service';
 
 export default class ListRolesPlugin extends Plugin {
   public commandName: string = 'listroles';
@@ -47,6 +48,6 @@ export default class ListRolesPlugin extends Plugin {
         res += `${role.name.toLowerCase()}\n`;
       });
     res += '```';
-    await this.container.messageService.attemptDMUser(message, res);
+    await MessageService.attemptDMUser(message, res);
   }
 }

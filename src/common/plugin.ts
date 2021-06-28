@@ -1,5 +1,6 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
+import { MessageService } from '../services/message.service';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -39,7 +40,7 @@ export abstract class Plugin implements IPlugin {
   }
 
   public hasPermission(message: IMessage): boolean {
-    const channelName = this.container.messageService.getChannel(message).name;
+    const channelName = MessageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
       message.reply(`Please use this command in the <#${id}> channel.`);

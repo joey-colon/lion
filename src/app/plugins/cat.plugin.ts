@@ -3,6 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import { MessageService } from '../../services/message.service';
 
 class Breed {
   public name: string = '';
@@ -88,7 +89,7 @@ export default class CatPlugin extends Plugin {
       return breedData.name;
     });
 
-    this._embedBreeds = this.container.messageService.generateEmbedList(breedsAsArray);
+    this._embedBreeds = MessageService.generateEmbedList(breedsAsArray);
     this._embedBreeds.setColor('#0099ff').setTitle('Breeds');
 
     return this._embedBreeds;

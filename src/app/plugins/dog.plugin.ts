@@ -3,6 +3,7 @@ import { MessageEmbed } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { MessageService } from '../../services/message.service';
 
 export default class DogPlugin extends Plugin {
   public commandName: string = 'dog';
@@ -128,7 +129,7 @@ export default class DogPlugin extends Plugin {
       return this._breedEmbed;
     }
 
-    this._breedEmbed = this.container.messageService.generateEmbedList(this._breeds);
+    this._breedEmbed = MessageService.generateEmbedList(this._breeds);
     this._breedEmbed.setColor('#0099ff').setTitle('Breeds');
 
     return this._breedEmbed;

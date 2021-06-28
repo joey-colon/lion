@@ -1,5 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { MessageService } from '../../services/message.service';
 
 export default class ListClassesPlugin extends Plugin {
   public commandName: string = 'listclasses';
@@ -31,7 +32,7 @@ export default class ListClassesPlugin extends Plugin {
     }
 
     for (const r of response) {
-      await this.container.messageService.attemptDMUser(message, r);
+      await MessageService.attemptDMUser(message, r);
     }
   }
 }

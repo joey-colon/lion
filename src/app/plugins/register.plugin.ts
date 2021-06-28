@@ -1,6 +1,7 @@
 import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import { MessageService } from '../../services/message.service';
 
 export default class RegisterPlugin extends Plugin {
   public commandName: string = 'register';
@@ -117,7 +118,7 @@ export default class RegisterPlugin extends Plugin {
     // Ships it off to the message Service to manage sending the message and its lifespan
     await Promise.all(
       embedMessages.map((embedData) => {
-        return this.container.messageService.sendReactiveMessage(
+        return MessageService.sendReactiveMessage(
           message,
           embedData,
           this.container.classService.addClass,

@@ -5,6 +5,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import { MessageService } from '../../services/message.service';
 
 export default class CrumblPlugin extends Plugin {
   public commandName: string = 'crumbl';
@@ -66,7 +67,7 @@ export default class CrumblPlugin extends Plugin {
 
         const cookies = blob.data.pageProps.products.cookies;
         const pages: MessageEmbed[] = this._createEmbed(cookies);
-        await this.container.messageService
+        await MessageService
           .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
           .catch((err) => this.container.loggerService.warn(err));

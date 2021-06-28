@@ -1,6 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { MessageService } from '../../services/message.service';
 import { Moderation } from '../../services/moderation.service';
 
 interface ILinkLabel {
@@ -43,7 +44,7 @@ export class BlacklistHandler implements IHandler {
             this.container.guildService.get().name
           }\` server.`
         );
-        this.container.messageService.sendBotReportOnMessage(message);
+        MessageService.sendBotReportOnMessage(message);
         const rep = new Moderation.Report(
           this.container.guildService.get(),
           message.author.tag,
@@ -60,7 +61,7 @@ export class BlacklistHandler implements IHandler {
     const hasAttachment = message.attachments.size;
 
     if (isClassChannel && (hasBackticks || hasAttachment)) {
-      this.container.messageService.sendBotReportOnMessage(message);
+      MessageService.sendBotReportOnMessage(message);
     }
   }
 }
