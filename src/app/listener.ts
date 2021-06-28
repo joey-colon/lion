@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import { HandlerService } from '../services/handler.service';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -143,31 +144,31 @@ export class Listener {
   }
 
   private _initializeHandlers(): void {
-    this.container.handlerService.messageHandlers.forEach((Handler) => {
+    HandlerService.messageHandlers.forEach((Handler) => {
       this._messageHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.messageUpdateHandlers.forEach((Handler) => {
+    HandlerService.messageUpdateHandlers.forEach((Handler) => {
       this._messageUpdateHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.privateMessageHandlers.forEach((Handler) => {
+    HandlerService.privateMessageHandlers.forEach((Handler) => {
       this._privateMessageHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.channelHandlers.forEach((Handler) => {
+    HandlerService.channelHandlers.forEach((Handler) => {
       this._channelHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.userUpdateHandlers.forEach((Handler) => {
+    HandlerService.userUpdateHandlers.forEach((Handler) => {
       this._userUpdateHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.memberAddHandlers.forEach((Handler) => {
+    HandlerService.memberAddHandlers.forEach((Handler) => {
       this._memberAddHandlers.push(new Handler(this.container));
     });
 
-    this.container.handlerService.reactionHandlers.forEach((Handler) => {
+    HandlerService.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.container));
     });
   }

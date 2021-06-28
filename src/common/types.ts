@@ -6,7 +6,6 @@ import * as discord from 'discord.js';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
-import { HandlerService } from '../services/handler.service';
 import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
@@ -51,7 +50,6 @@ export interface IContainer extends BottleContainer {
   messageService: MessageService;
   channelService: ChannelService;
   classService: ClassService;
-  handlerService: HandlerService;
   jobService: JobService;
   storeService: StoreService;
   modService: ModService;

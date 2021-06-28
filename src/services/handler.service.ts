@@ -12,8 +12,8 @@ import { LionPingHandler } from '../app/handlers/lionping.handler';
 import { MemberCountHandler } from '../app/handlers/membercount.handler';
 import { EveryoneHandler } from '../app/handlers/everyone.handler';
 
-export class HandlerService {
-  public messageHandlers = [
+export const HandlerService = {
+  messageHandlers: [
     BlacklistHandler,
     CommandHandler,
     RequireUrlHandler,
@@ -21,24 +21,20 @@ export class HandlerService {
     CountingHandler,
     LionPingHandler,
     EveryoneHandler,
-  ];
+  ],
 
-  public messageUpdateHandlers = [
+  messageUpdateHandlers: [
     BlacklistHandler,
     RequireUrlHandler,
     TagRateLimitHandler,
     ReactHandler,
     CountingHandler,
     EveryoneHandler,
-  ];
+  ],
 
-  public privateMessageHandlers = [CommandHandler];
-
-  public channelHandlers = [ClassChannelHandler];
-
-  public userUpdateHandlers = [UserUpdateHandler];
-
-  public memberAddHandlers = [NewMemberRoleHandler, WelcomeHandler, MemberCountHandler];
-
-  public reactionHandlers = [ReactHandler];
-}
+  privateMessageHandlers: [CommandHandler],
+  channelHandlers: [ClassChannelHandler],
+  userUpdateHandlers: [UserUpdateHandler],
+  memberAddHandlers: [NewMemberRoleHandler, WelcomeHandler, MemberCountHandler],
+  reactionHandlers: [ReactHandler],
+};

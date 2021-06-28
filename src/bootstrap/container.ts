@@ -4,7 +4,6 @@ import { PluginService } from '../services/plugin.service';
 import { MessageService } from '../services/message.service';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
-import { HandlerService } from '../services/handler.service';
 import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
@@ -23,7 +22,6 @@ export class Container {
     this._bottle.service('messageService', MessageService, 'clientService', 'loggerService');
     this._bottle.service('channelService', ChannelService);
     this._bottle.service('classService', ClassService, 'clientService', 'loggerService');
-    this._bottle.service('handlerService', HandlerService);
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
     this._bottle.service('storageService', StorageService, 'loggerService');
