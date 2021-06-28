@@ -1,12 +1,12 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Moderation } from './moderation.service';
 import Environment from '../environment';
-import { LoggerService } from './logger.service';
 import { ITAEntry } from '../app/plugins/ta.plugin';
 import { IGameLeaderBoardEntry } from './gameleaderboard.service';
 import { IServerInfo } from '../common/types';
 import { IClassPin } from '../app/plugins/storepins.plugin';
 import { IPluginState } from './plugin.service';
+import winston from 'winston';
 
 export class StorageService {
   private _db?: Db;
@@ -24,7 +24,7 @@ export class StorageService {
     pluginState?: Collection<IPluginState>;
   } = {};
 
-  public constructor(private _loggerService: LoggerService) {
+  public constructor() {
     this._connectToDB();
   }
 
@@ -36,7 +36,7 @@ export class StorageService {
     const connectionString = this._buildMongoConnectionString();
 
     try {
-      this._loggerService.debug(`Connecting to ${connectionString}`);
+      winston.debug(`Connecting to ${connectionString}`);
       this._client = await MongoClient.connect(connectionString, {
         bufferMaxEntries: 0,
         useNewUrlParser: true,
@@ -57,7 +57,7 @@ export class StorageService {
 
       console.info(`Successfully connected to ${this._db.databaseName}`);
     } catch (e) {
-      this._loggerService.error(e);
+      winston.error(e);
     } finally {
       return this._db;
     }

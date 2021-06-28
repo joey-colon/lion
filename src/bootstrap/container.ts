@@ -10,7 +10,6 @@ import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
 import { StorageService } from '../services/storage.service';
-import { LoggerService } from '../services/logger.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
@@ -20,7 +19,6 @@ import { UserService } from '../services/user.service';
 
 export class Container {
   constructor(private _bottle: Bottle) {
-    this._bottle.service('loggerService', LoggerService);
     this._bottle.service('clientService', ClientService);
     this._bottle.service('guildService', GuildService, 'clientService');
     this._bottle.service('pluginService', PluginService);
