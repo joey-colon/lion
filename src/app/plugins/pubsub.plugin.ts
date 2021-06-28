@@ -3,6 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
+import axios from 'axios';
 
 export class PubSubPlugin extends Plugin {
   public name: string = 'Pub Sub Plugin';
@@ -27,7 +28,7 @@ export class PubSubPlugin extends Plugin {
   }
 
   private async _updateData() {
-    this.container.httpService
+    axios
       .get(`${this._API_URL}/allsubs/`)
       .then((response: IHttpResponse) => {
         const subs = response.data;
@@ -50,7 +51,7 @@ export class PubSubPlugin extends Plugin {
     const subType = this._SUBS.find((sub: string) => sub === input) || 'random';
 
     // receives the according info and posts
-    await this.container.httpService
+    await axios
       .get(`${this._API_URL}/subs/?name=${subType}`)
       .then((response: IHttpResponse) => {
         if (Math.floor(response.status / 100) !== 2) {

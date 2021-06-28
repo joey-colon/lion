@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
 import { load } from 'cheerio';
+import axios from 'axios';
 
 class Garage {
   public name: string = '';
@@ -78,7 +79,7 @@ export class GaragePlugin extends Plugin {
 
     this._LAST_UPD_TIME = Date.now();
 
-    await this.container.httpService
+    await axios
       .get(`${this._API_URL}`)
       .then((response: IHttpResponse) => {
         return (this._GARAGES = this._processResponse(response.data));

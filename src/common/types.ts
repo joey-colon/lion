@@ -8,7 +8,6 @@ import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
 import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
-import { HttpService } from '../services/http.service';
 import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
 import { PluginService } from '../services/plugin.service';
@@ -49,7 +48,6 @@ export interface IPlugin {
 
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
-  httpService: HttpService;
   guildService: GuildService;
   pluginService: PluginService;
   messageService: MessageService;

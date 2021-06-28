@@ -4,6 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
+import axios from 'axios';
 
 export class CrumblPlugin extends Plugin {
   public name: string = 'Crumbl Cookies Plugin';
@@ -45,7 +46,7 @@ export class CrumblPlugin extends Plugin {
   }
 
   public async execute(message: IMessage) {
-    await this.container.httpService
+    await axios
       .get('https://crumblcookies.com')
       .then((response: IHttpResponse) => {
         const data: string = response.data;
@@ -53,7 +54,7 @@ export class CrumblPlugin extends Plugin {
       })
       .catch((err) => this.container.loggerService.warn(err));
 
-    await this.container.httpService
+    await axios
       .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {

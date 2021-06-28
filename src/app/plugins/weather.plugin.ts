@@ -2,6 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import Environment from '../../environment';
+import axios from 'axios';
 
 export class WeatherPlugin extends Plugin {
   public name: string = 'Weather Plugin';
@@ -305,8 +306,8 @@ export class WeatherPlugin extends Plugin {
     const weatherUrl: string = this._getWeather('weather', message);
     const forecastUrl: string = this._getWeather('forecast', message);
 
-    this.container.httpService.get(weatherUrl).then((wdata) => {
-      this.container.httpService.get(forecastUrl).then((fdata) => {
+    axios.get(weatherUrl).then((wdata) => {
+      axios.get(forecastUrl).then((fdata) => {
         const embed = this._createEmbed(wdata.data, fdata.data);
         message.channel.send(embed);
       });
