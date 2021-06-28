@@ -21,6 +21,7 @@ import {
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from './guild.service';
 import levenshtein from 'js-levenshtein';
+import { ClientService } from './client.service';
 export class ClassService {
   private _guild: Guild;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
@@ -33,8 +34,8 @@ export class ClassService {
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
-  constructor(private _guildService: GuildService) {
-    this._guild = this._guildService.get();
+  constructor(private _clientService: ClientService) {
+    this._guild = GuildService.getGuild(_clientService);
     this._addClasses();
   }
 
@@ -330,16 +331,16 @@ export class ClassService {
     }
 
     if (!this._CLASS_VC_CAT) {
-      this._CLASS_VC_CAT = this._guildService.getChannel('class voice') as CategoryChannel;
+      this._CLASS_VC_CAT = GuildService.getChannel(this._clientService, 'class voice') as CategoryChannel;
     }
 
-    const everyoneRole = this._guildService.getRole('@everyone');
+    const everyoneRole = GuildService.getRole(this._clientService, '@everyone');
     return this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
-          id: everyoneRole.id,
+          id: everyoneRole!.id,
           deny: ['VIEW_CHANNEL'],
         },
         {

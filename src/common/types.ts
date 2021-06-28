@@ -6,7 +6,6 @@ import * as discord from 'discord.js';
 import { ChannelService } from '../services/channel.service';
 import { ClassService } from '../services/class.service';
 import { ClientService } from '../services/client.service';
-import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 import { JobService } from '../services/job.service';
 import { MessageService } from '../services/message.service';
@@ -48,7 +47,6 @@ export interface IPlugin {
 
 export interface IContainer extends BottleContainer {
   clientService: ClientService;
-  guildService: GuildService;
   pluginService: PluginService;
   messageService: MessageService;
   channelService: ChannelService;

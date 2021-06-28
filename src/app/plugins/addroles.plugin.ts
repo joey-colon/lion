@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GuildEmoji, EmojiIdentifierResolvable } from 'discord.js';
+import { GuildEmoji, EmojiIdentifierResolvable, Guild } from 'discord.js';
+import { GuildService } from '../../services/guild.service';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -15,9 +16,11 @@ export default class AddRolesPlugin extends Plugin {
     alumni: { emojiName: 'okboomer', emoji: undefined },
     gradstudent: { emojiName: 'knight', emoji: undefined },
   };
+  private _guild: Guild;
 
   constructor(public container: IContainer) {
     super();
+    this._guild = GuildService.getGuild(container.clientService);
   }
 
   public validate(message: IMessage, args: string[]) {
@@ -32,8 +35,7 @@ export default class AddRolesPlugin extends Plugin {
 
     // check to see if emoji has been instantiated
     if (!this._emojis[role].emoji) {
-      this._emojis[role].emoji = this.container.guildService
-        .get()
+      this._emojis[role].emoji = this._guild
         .emojis.cache.filter((n) => n.name.toLowerCase() === this._emojis[role].emojiName)
         .first();
     }
@@ -56,8 +58,7 @@ export default class AddRolesPlugin extends Plugin {
         continue;
       }
 
-      const role = this.container.guildService
-        .get()
+      const role = this._guild
         .roles.cache.find((r) => r.name.toLowerCase() === elem.toLowerCase());
       if (!role) {
         continue;

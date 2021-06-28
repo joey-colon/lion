@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
+import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { StorageService } from './storage.service';
 
@@ -59,7 +60,7 @@ export class GameLeaderboardService {
 
   constructor(
     private _storageService: StorageService,
-    private _guildService: GuildService,
+    private _clientService: ClientService,
   ) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
@@ -70,23 +71,25 @@ export class GameLeaderboardService {
       return;
     }
 
+    const guildId = GuildService.getGuild(this._clientService).id;
+
     // Get the entry for the user
     let userDoc = await leaderboard.findOne({
       userId: user.id,
-      guildId: this._guildService.get().id,
+      guildId,
     });
 
     // if the user doesnt have an entry yet, make one for them
     if (!userDoc) {
       await leaderboard.create({
         userId: user.id,
-        guildId: this._guildService.get().id,
+        guildId,
         games: [],
       });
 
       userDoc = await leaderboard.findOne({
         userId: user.id,
-        guildId: this._guildService.get().id,
+        guildId,
       });
     }
 
@@ -177,7 +180,8 @@ export class GameLeaderboardService {
   }
 
   private async _parseCollectionData(leaderboard: mongoose.Model<IGameLeaderBoardEntry>): Promise<IUserOverallEntry[]> {
-    const res = await leaderboard.find({ guildId: this._guildService.get().id });
+    const guildId = GuildService.getGuild(this._clientService).id;
+    const res = await leaderboard.find({ guildId });
     return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
       const stats = this._getOverallStats(doc);
       if (stats) {
@@ -190,6 +194,7 @@ export class GameLeaderboardService {
   }
 
   public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
+    const guildId = GuildService.getGuild(this._clientService).id;
     const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = this._gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
       winston.error(`Could not get leaderboard for ${gameType}`);
@@ -197,7 +202,7 @@ export class GameLeaderboardService {
     }
 
     const entries: IGameLeaderBoardEntry[] = await leaderboard
-      .find({ guildId: this._guildService.get().id });
+      .find({ guildId });
 
     const [userOneEntry] = entries.filter((e) => e.userId === userOne.id);
 
@@ -238,7 +243,8 @@ export class GameLeaderboardService {
   }
 
   private _getOverallStats(entry: IGameLeaderBoardEntry): Maybe<IUserOverallEntry> {
-    const user = this._guildService.get().members.cache.get(entry.userId)?.user;
+    const user = GuildService.getGuild(this._clientService)
+      .members.cache.get(entry.userId)?.user;
     if (!user) {
       return null;
     }

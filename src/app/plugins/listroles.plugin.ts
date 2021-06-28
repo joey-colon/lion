@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
+import { GuildService } from '../../services/guild.service';
 
 export default class ListRolesPlugin extends Plugin {
   public commandName: string = 'listroles';
@@ -30,9 +31,8 @@ export default class ListRolesPlugin extends Plugin {
       mp.set(role[1].name.toLowerCase(), true);
     }
 
-    const chatbotRole = this.container.guildService.getRole('Chatbot');
-    this.container.guildService
-      .get()
+    const chatbotRole = GuildService.getRole(this.container.clientService, 'Chatbot')!;
+    GuildService.getGuild(this.container.clientService)
       .roles.cache.sort((a: Role, b: Role) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       )

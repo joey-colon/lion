@@ -2,6 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
+import { GuildService } from '../../services/guild.service';
 
 interface IChannel {
   name: string;
@@ -69,8 +70,7 @@ export default class AddClassChannelsPlugin extends Plugin {
 
     const getCat = async (category: string) => {
       category = category.toLowerCase();
-      const ret = this.container.guildService
-        .get()
+      const ret = GuildService.getGuild(this.container.clientService)
         .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
       if (!ret) {
         try {

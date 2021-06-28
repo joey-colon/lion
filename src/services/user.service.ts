@@ -1,13 +1,14 @@
 import { GuildMember, Role } from 'discord.js';
 import moment from 'moment';
 import { Maybe } from '../common/types';
+import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 
 export class UserService {
   private _STRIP_NON_NUMERIC: RegExp = /^\d/g;
   public static readonly AGE_THRESHOLD = moment.duration(2, 'days');
 
-  constructor(private _guildService: GuildService) {}
+  constructor(private _clientService: ClientService) {}
 
   /**
    * Finds a user by tag, id, or username
@@ -15,8 +16,7 @@ export class UserService {
   public getMember(target: string): Maybe<GuildMember> {
     const strippedID = target.replace(this._STRIP_NON_NUMERIC, ''); // Remove extra stuff that can come when an @
 
-    return this._guildService
-      .get()
+    return GuildService.getGuild(this._clientService)
       .members.cache.filter((member) => {
         const { nickname } = member;
         const { tag, username, id } = member.user;

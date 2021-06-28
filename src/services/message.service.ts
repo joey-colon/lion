@@ -4,6 +4,7 @@ import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import * as moment from 'moment';
 import winston from 'winston';
+import { ClientService } from './client.service';
 
 export class MessageService {
   private _botReportingChannel: TextChannel | null = null;
@@ -12,8 +13,8 @@ export class MessageService {
   private _ARROWS = ['⬅️', '➡️'];
   private _CANCEL_EMOTE = '❎';
 
-  constructor(private _guildService: GuildService) {
-    this._guild = this._guildService.get();
+  constructor(private _clientService: ClientService) {
+    this._guild = GuildService.getGuild(_clientService);
     this._getBotReportChannel();
   }
 

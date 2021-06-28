@@ -2,6 +2,7 @@ import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
+import { GuildService } from '../../services/guild.service';
 
 export class PoliticsCoCReminder extends Job {
   public interval: number = 1000 * 60 * 30; // every 30 minutes
@@ -22,8 +23,7 @@ export class PoliticsCoCReminder extends Job {
 
       // console.log(container.guildService.get().channels);
 
-      const politicsChan = container.guildService
-        .get()
+      const politicsChan = GuildService.getGuild(container.clientService)
         .channels.cache.find((c) => c.name === Constants.Channels.Public.Politics);
 
       if (!politicsChan) {
@@ -31,8 +31,7 @@ export class PoliticsCoCReminder extends Job {
         return;
       }
 
-      const codeOfConduct = container.guildService
-        .get()
+      const codeOfConduct = GuildService.getGuild(container.clientService)
         .channels.cache.find((c) => c.name === Constants.Channels.Info.CodeOfConduct);
 
       if (!codeOfConduct) {

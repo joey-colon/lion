@@ -10,7 +10,7 @@ export class WarningService {
 
   public ACKNOWLEDGE_EMOJI = '👍';
 
-  constructor(private _clientService: ClientService, private _guildService: GuildService) {}
+  constructor(private _clientService: ClientService) {}
 
   public async sendModMessageToUser(message: string, rep: Moderation.Report) {
     await this._clientService.users.cache
@@ -23,10 +23,10 @@ export class WarningService {
 
   private async _createChannelForWarn(message: string, rep: Moderation.Report) {
     if (!this._warnCategory) {
-      this._warnCategory = this._guildService.getChannel('warnings') as CategoryChannel;
+      this._warnCategory = GuildService.getChannel(this._clientService, 'warnings') as CategoryChannel;
     }
 
-    const member = this._guildService.get().members.cache.get(rep.user);
+    const member = GuildService.getGuild(this._clientService).members.cache.get(rep.user);
     if (!member) {
       return;
     }
@@ -39,23 +39,27 @@ export class WarningService {
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
     // Give user Supsended Role until they acknowledge
-    await member.roles.add(this._guildService.getRole('Suspended'));
+    await member.roles.add(GuildService.getRole(this._clientService, 'Suspended')!);
   }
 
-  private async _getChanForUser(rep: Moderation.Report, warnCat: CategoryChannel) {
+  private _getChanForUser(rep: Moderation.Report, warnCat: CategoryChannel) {
     if (this._chanMap.has(rep.user)) {
       return this._chanMap.get(rep.user) as GuildChannel;
     }
 
-    return this._guildService.get().channels.create(rep.user, {
+    const guild = GuildService.getGuild(this._clientService);
+    const { id } = guild;
+    const modID = GuildService.getRole(this._clientService, 'Moderator')!.id;
+
+    return guild.channels.create(rep.user, {
       parent: warnCat,
       permissionOverwrites: [
         {
-          id: this._guildService.get().id,
+          id,
           deny: ['VIEW_CHANNEL'],
         },
         {
-          id: this._guildService.getRole('Moderator').id,
+          id: modID,
           deny: ['VIEW_CHANNEL'],
         },
         {
@@ -76,16 +80,15 @@ export class WarningService {
   }
 
   public async deleteChan(id: Snowflake) {
-    await this._guildService
-      .get()
+    const guild = GuildService.getGuild(this._clientService);
+    await guild
       .members.cache.get(id)
-      ?.roles.remove(this._guildService.getRole('Suspended'));
+      ?.roles.remove(GuildService.getRole(this._clientService, 'Suspended')!);
 
     let chan = this._chanMap.get(id);
     if (!chan) {
       // If the bot restated, it wont be in the map
-      chan = this._guildService
-        .get()
+      chan = guild
         .channels.cache.filter((c) => c.name === id)
         .first();
     }

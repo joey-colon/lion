@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
-import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
+import { CategoryChannel, Collection, Guild, GuildChannel, User } from 'discord.js';
+import { GuildService } from '../../services/guild.service';
 
 export default class ShadowBanPlugin extends Plugin {
   public commandName: string = 'shadowban';
@@ -13,6 +14,7 @@ export default class ShadowBanPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
   public commandPattern: RegExp = /(ban|unban)\s[^#]+#\d{4}/;
 
+  private _guild: Guild;
   private _BANNED_CATEGORIES: string[] = [
     'GENERAL & SCHOOL LIFE',
     'DAILY ROUTINE',
@@ -24,13 +26,13 @@ export default class ShadowBanPlugin extends Plugin {
 
   constructor(public container: IContainer) {
     super();
+    this._guild = GuildService.getGuild(container.clientService);
   }
 
   public async execute(message: IMessage, args: string[]) {
     const [subCommand, ...userArg] = args;
     const targetUser = userArg.join(' ');
-    const user = this.container.guildService
-      .get()
+    const user = this._guild
       .members.cache.filter((m) => m.user.tag === targetUser)
       .first()?.user;
 
@@ -51,8 +53,7 @@ export default class ShadowBanPlugin extends Plugin {
   }
 
   private async _applyToChannels(callback: (chan: GuildChannel) => void) {
-    const categories = this.container.guildService
-      .get()
+    const categories = this._guild
       .channels.cache.filter((chan) => chan.type === 'category') as Collection<
       string,
       CategoryChannel

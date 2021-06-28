@@ -3,13 +3,13 @@ import mongoose, { Document } from 'mongoose';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
 import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 import winston from 'winston';
+import { GuildService } from './guild.service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -108,7 +108,6 @@ export class ModService {
   constructor(
     private _storageService: StorageService,
     private _clientService: ClientService,
-    private _guildService: GuildService,
     private _warningService: WarningService
   ) {}
 
@@ -128,8 +127,7 @@ export class ModService {
 
     winston.info(`Filing report with ticket_id ${ticket_id}`);
 
-    const userOffenseChan = this._guildService
-      .get()
+    const userOffenseChan = GuildService.getGuild(this._clientService)!
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
     if (!userOffenseChan) {
@@ -161,7 +159,7 @@ export class ModService {
     }
 
     const [, user_id] = decoded;
-    const user = this._guildService.get().members.cache.get(user_id);
+    const user = GuildService.getGuild(this._clientService).members.cache.get(user_id);
 
     if (!user) {
       winston.error(
@@ -174,7 +172,7 @@ export class ModService {
       .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
         files: message.attachments.map((a) => a.url),
       })
-      .catch((e) => winston.error(e));
+      .catch(winston.error);
 
     return ticket_id;
   }
@@ -202,7 +200,7 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
-    const member = this._guildService.get().members.cache.get(report.user);
+    const member = GuildService.getGuild(this._clientService).members.cache.get(report.user);
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
     }
@@ -262,9 +260,10 @@ export class ModService {
       reportId: reportResult,
     });
 
+    const guild = GuildService.getGuild(this._clientService);
+
     try {
-      await this._guildService
-        .get()
+      await guild
         .members.cache.get(report.user)
         ?.send(
           `You have been banned for one week for ${report.description ??
@@ -275,7 +274,7 @@ export class ModService {
     }
 
     try {
-      await this._guildService.get().members.ban(report.user, { reason: report.description });
+      await guild.members.ban(report.user, { reason: report.description });
     } catch (e) {
       return `Issue occurred trying to ban user. ${e}`;
     }
@@ -441,7 +440,7 @@ export class ModService {
       return;
     }
 
-    const guild = this._guildService.get();
+    const guild = GuildService.getGuild(this._clientService);
     const bulk = ModerationBanModel.collection.initializeUnorderedBulkOp();
 
     const sevenDaysAgo = new Date();
