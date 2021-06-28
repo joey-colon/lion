@@ -1,6 +1,7 @@
 import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 import { MessageService } from '../services/message.service';
+import { GuildService } from '../services/guild.service';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
@@ -42,7 +43,7 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = MessageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-      const id = this.container.guildService.getChannel(this.pluginChannelName).id;
+      const id = GuildService.getChannel(this.container.client, this.pluginChannelName)!.id;
       message.reply(`Please use this command in the <#${id}> channel.`);
       return false;
     }
@@ -83,12 +84,12 @@ export abstract class Plugin implements IPlugin {
       try {
         const id = channels
           .filter((channel) => {
-            return this.container.guildService
-              .getChannel(channel)
+            return GuildService
+              .getChannel(this.container.clientService, channel)!
               .permissionsFor(message.member ?? '')
               ?.has('VIEW_CHANNEL');
           })
-          .map((room) => this.container.guildService.getChannel(room).id);
+          .map((room) => GuildService.getChannel(this.container.clientService, room)!.id);
 
         if (id.length === 0) {
           message.reply(`${baseReply} There are no permanent channels of this type.`);

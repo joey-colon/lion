@@ -16,7 +16,6 @@ import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
-import { UserService } from '../services/user.service';
 import { Document } from 'mongoose';
 
 export interface IConfig {
@@ -57,7 +56,6 @@ export interface IContainer extends BottleContainer {
   warningService: WarningService;
   twitterService: TwitterService;
   gameLeaderboardService: GameLeaderboardService;
-  userService: UserService;
 }
 
 export interface IMessage extends discord.Message {}

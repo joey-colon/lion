@@ -1,5 +1,6 @@
 import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { GuildService } from '../../services/guild.service';
 
 export class ReactHandler implements IHandler {
   private _PIN_THRESH = 5;
@@ -19,7 +20,7 @@ export class ReactHandler implements IHandler {
   }
 
   private async _handleWarningAcknowledge(reaction: MessageReaction, user: User) {
-    const warnCat = this.container.guildService.getChannel('warnings') as CategoryChannel;
+    const warnCat = GuildService.getChannel(user.client, 'warnings') as CategoryChannel;
     const chan = reaction.message.channel as GuildChannel;
     if (chan.parent !== warnCat) {
       return;

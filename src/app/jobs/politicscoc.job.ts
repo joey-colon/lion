@@ -16,14 +16,15 @@ export class PoliticsCoCReminder extends Job {
     try {
       container.loggerService.debug(`Starting ${this.name} job`);
 
-      if (!container.guildService.get()) {
+      const guild = GuildService.getGuild(container.clientService);
+      if (!guild) {
         container.loggerService.warn('No guild yet');
         return;
       }
 
       // console.log(container.guildService.get().channels);
 
-      const politicsChan = GuildService.getGuild(container.clientService)
+      const politicsChan = guild
         .channels.cache.find((c) => c.name === Constants.Channels.Public.Politics);
 
       if (!politicsChan) {

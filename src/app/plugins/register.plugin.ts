@@ -1,7 +1,9 @@
 import { User } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import { GuildService } from '../../services/guild.service';
 import { MessageService } from '../../services/message.service';
+import { UserService } from '../../services/user.service';
 
 export default class RegisterPlugin extends Plugin {
   public commandName: string = 'register';
@@ -33,7 +35,7 @@ export default class RegisterPlugin extends Plugin {
     if (!message.member) {
       return;
     }
-    const isModerator = this.container.userService.hasRole(message.member, 'Moderator');
+    const isModerator = UserService.hasRole(message.member, 'Moderator');
     if (!isModerator && registeredClasses.length + args.length > this._MAX_ALLOWED_CLASSES) {
       await message.reply(
         `Sorry, you can only register for ${this._MAX_ALLOWED_CLASSES} classes in total.`
@@ -50,7 +52,7 @@ export default class RegisterPlugin extends Plugin {
 
   private async _attemptAddClass(className: string, user: User): Promise<string> {
     if (className.toLowerCase() === 'all') {
-      const isModerator = this.container.guildService.userHasRole(user, 'Moderator');
+      const isModerator = GuildService.userHasRole(user, 'Moderator');
       if (!isModerator) {
         return 'You must be a `Moderator` to register for `all`.';
       }

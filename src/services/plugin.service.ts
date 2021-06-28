@@ -4,6 +4,7 @@ import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
+import { GuildService } from './guild.service';
 
 export interface IPluginState {
   name: string;
@@ -25,7 +26,7 @@ export class PluginService {
       await container.storageService.connectToDB();
     }
 
-    const fetchedStates = await PluginStateModel.find({ guildID: container.guildService.get().id });
+    const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(container.clientService).id });
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {

@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import Constants from '../common/constants';
 import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
@@ -48,9 +49,8 @@ export class Listener {
         return;
       }
 
-      const notificationChannel = this.container.guildService.getChannel(
-        Constants.Channels.Public.LionProjectGithub
-      ) as TextChannel;
+      const notificationChannel = GuildService
+        .getChannel(this.container.clientService, Constants.Channels.Public.LionProjectGithub) as TextChannel;
 
       const embed = new MessageEmbed();
       embed
@@ -100,7 +100,7 @@ export class Listener {
     // If the message has a guild, use regular message handlers
     // Otherwise, it's a DM to handle differently.
     if (message.guild) {
-      await this._tryEnsureMessageMember(message);
+      this._tryEnsureMessageMember(message);
 
       if (isMessageUpdate) {
         await this._executeHandlers(this._messageUpdateHandlers, message);
@@ -115,7 +115,7 @@ export class Listener {
   // / Tries to make sure that message.member != null
   // / However, message.member may be null if, for example,
   // / the user leaves the guild before we try to look them up.
-  private async _tryEnsureMessageMember(message: IMessage) {
+  private _tryEnsureMessageMember(message: IMessage) {
     if (message.member) {
       return;
     }
@@ -125,7 +125,7 @@ export class Listener {
         `Attempting extra lookup of ${message.author.tag} to a GuildMember`
       );
 
-      const member = await this.container.guildService.get().members.fetch(message.author.id);
+      const member = GuildService.getGuild(message.client).members.fetch(message.author.id);
 
       // Removed as message.member is now read only
       // message.member = member;

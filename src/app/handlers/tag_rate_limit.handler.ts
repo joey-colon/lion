@@ -1,6 +1,7 @@
 import { IHandler, IMessage, IContainer } from '../../common/types';
 import { Guild } from 'discord.js';
 import { MessageService } from '../../services/message.service';
+import { GuildService } from '../../services/guild.service';
 
 export class TagRateLimitHandler implements IHandler {
   private _MAX_ROLES_TAGGED = 6;
@@ -16,8 +17,10 @@ export class TagRateLimitHandler implements IHandler {
       return;
     }
 
+    const guild = GuildService.getGuild(message.client);
+
     const guild_map: Map<string, number[]> =
-      this._TAGS_MAP.get(this.container.guildService.get()) ?? new Map<string, number[]>();
+      this._TAGS_MAP.get(guild) ?? new Map<string, number[]>();
 
     guild_map.set(message.member.id, guild_map.get(message.member.id) ?? []);
 
@@ -38,6 +41,6 @@ export class TagRateLimitHandler implements IHandler {
 
     // upd stuff... by reference, should be fast
     guild_map.set(message.member.id, dates);
-    this._TAGS_MAP.set(this.container.guildService.get(), guild_map);
+    this._TAGS_MAP.set(guild, guild_map);
   }
 }

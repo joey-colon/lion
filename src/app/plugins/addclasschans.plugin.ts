@@ -3,6 +3,7 @@ import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { GuildService } from '../../services/guild.service';
+import winston from 'winston';
 
 interface IChannel {
   name: string;
@@ -68,23 +69,26 @@ export default class AddClassChannelsPlugin extends Plugin {
       return;
     }
 
+    const guild = GuildService.getGuild(message.client);
+
     const getCat = async (category: string) => {
       category = category.toLowerCase();
       const ret = GuildService.getGuild(this.container.clientService)
         .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
       if (!ret) {
+        
         try {
-          return await this.container.guildService.get().channels.create(category, {
+          return await guild.channels.create(category, {
             type: 'category',
             permissionOverwrites: [
               {
-                id: this.container.guildService.get().id,
+                id: guild.id,
                 deny: ['VIEW_CHANNEL'],
               },
             ],
           });
         } catch (e) {
-          this.container.loggerService.error(e);
+          winston.error(e);
         }
       }
       return ret;
@@ -104,14 +108,13 @@ export default class AddClassChannelsPlugin extends Plugin {
     for (const chan of this._STATE) {
       // create channel
       try {
-        await this.container.guildService
-          .get()
+        await guild
           .channels.create(chan.name, {
             type: 'text',
             parent: patternToCategory.get(chan.category),
             permissionOverwrites: [
               {
-                id: this.container.guildService.get().id,
+                id: guild.id,
                 deny: ['VIEW_CHANNEL'],
               },
             ],

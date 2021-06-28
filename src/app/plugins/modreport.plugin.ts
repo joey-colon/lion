@@ -1,6 +1,8 @@
+import { Guild } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { GuildService } from '../../services/guild.service';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -12,9 +14,12 @@ export default class ModReportPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
   public commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
+  
+  private _guild: Guild;
 
   constructor(public container: IContainer) {
     super();
+    this._guild = GuildService.getGuild(container.clientService);
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -46,14 +51,14 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _createReport(message: IMessage, user_handle: string, description?: string) {
-    const id = await Moderation.Helpers.resolveUser(this.container.guildService.get(), user_handle);
+    const id = await Moderation.Helpers.resolveUser(this._guild, user_handle);
     
     if (!id) {
       return;
     }
 
     const rep: Moderation.Report = new Moderation.Report(
-      this.container.guildService.get(),
+      this._guild,
       id,
       description,
       message.attachments.map((e) => e.url)
@@ -74,7 +79,7 @@ export default class ModReportPlugin extends Plugin {
   private async _handleListReport(message: IMessage, user_handle: string) {
     message.reply(
       await this.container.modService.getModerationSummary(
-        this.container.guildService.get(),
+        this._guild,
         user_handle
       )
     );
@@ -85,7 +90,7 @@ export default class ModReportPlugin extends Plugin {
       await message.reply(`Full Report for ${user_handle}`, {
         files: [
           await this.container.modService.getFullReport(
-            this.container.guildService.get(),
+            this._guild,
             user_handle
           ),
         ],

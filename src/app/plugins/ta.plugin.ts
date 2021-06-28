@@ -4,6 +4,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
+import { UserService } from '../../services/user.service';
+import { GuildService } from '../../services/guild.service';
 
 export default class TaPlugin extends Plugin {
   public commandName: string = 'ta';
@@ -42,7 +44,7 @@ export default class TaPlugin extends Plugin {
     }
 
     const hasAllowedRole = this._ALLOWED_ROLES.some((role) =>
-      this.container.userService.hasRole(member, role)
+      UserService.hasRole(member, role)
     );
     if (!hasAllowedRole) {
       await message.reply('You must be a TA to use this command');
@@ -121,7 +123,7 @@ export default class TaPlugin extends Plugin {
       })).filter((e) => e.chanID === chan.id);
 
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
-      const member = this.container.guildService.get().members.cache.get(entry.userID);
+      const member = GuildService.getGuild(this.container.clientService).members.cache.get(entry.userID);
       if (member) {
         acc.push(member);
       }

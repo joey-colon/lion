@@ -3,6 +3,7 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 import { MessageService } from '../../services/message.service';
 import { Moderation } from '../../services/moderation.service';
+import { UserService } from '../../services/user.service';
 
 interface ILinkLabel {
   regex: RegExp;
@@ -29,7 +30,7 @@ export class BlacklistHandler implements IHandler {
     }
 
     // Whitelist moderators
-    if (this.container.userService.hasRole(member, 'Moderator')) {
+    if (UserService.hasRole(member, 'Moderator')) {
       return;
     }
 
@@ -41,12 +42,12 @@ export class BlacklistHandler implements IHandler {
       if (message.content.toLowerCase().match(regex)) {
         message.author.send(
           `Please do not share \`${label}\` links in the \`${
-            this.container.guildService.get().name
+            message.guild!.name
           }\` server.`
         );
         MessageService.sendBotReportOnMessage(message);
         const rep = new Moderation.Report(
-          this.container.guildService.get(),
+          message.guild!,
           message.author.tag,
           `Shared a ${label} link.`
         );

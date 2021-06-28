@@ -52,7 +52,7 @@ export default class ManageRolesPlugin extends Plugin {
   }
 
   private async _dumpRolesInfo(message: IMessage) {
-    const highestRole = this.container.guildService.get().roles.highest;
+    const highestRole = GuildService.getGuild(message.client).roles.highest;
     const rolesInfo = GuildService.getGuild(this.container.clientService)
       .roles.cache.reduce((acc: IRoleInfo[], curRole) => {
         // only include roles that the bot can actually update.
@@ -91,7 +91,7 @@ export default class ManageRolesPlugin extends Plugin {
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {
     try {
-      const role = this.container.guildService.get().roles.cache.get(roleInfo.id);
+      const role = GuildService.getGuild(this.container.clientService).roles.cache.get(roleInfo.id);
 
       if (!role) {
         return;

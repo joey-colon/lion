@@ -2,6 +2,7 @@ import { GuildChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { GuildService } from '../../services/guild.service';
 
 export default class ChanBanPlugin extends Plugin {
   public commandName: string = 'chanban';
@@ -34,15 +35,16 @@ export default class ChanBanPlugin extends Plugin {
 
     const [, username, channels] = match;
 
+    const guild = GuildService.getGuild(this.container.clientService);
     const channel_objs =
       channels
         .match(this._channelIDRegex)
-        ?.map((c) => this.container.guildService.get().channels.cache.get(c.replace(/\D/g, '')))
+        ?.map((c) => guild.channels.cache.get(c.replace(/\D/g, '')))
         .filter((c) => c !== undefined) ?? [];
 
     try {
       const successfully_banned_channels = await this.container.modService.channelBan(
-        this.container.guildService.get(),
+        guild,
         username,
         channel_objs as GuildChannel[]
       );

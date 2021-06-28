@@ -1,6 +1,8 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage } from '../../common/types';
+import { GuildService } from '../../services/guild.service';
+import { UserService } from '../../services/user.service';
 
 export class EveryoneHandler implements IHandler {
   constructor(public container: IContainer) {}
@@ -14,12 +16,12 @@ export class EveryoneHandler implements IHandler {
       return;
     }
 
-    const isModerator = this.container.userService.hasRole(message.member, 'admin');
+    const isModerator = UserService.hasRole(message.member, 'admin');
     if (isModerator) {
       return;
     }
 
-    const botLogsChannel = this.container.guildService.getChannel(Constants.Channels.Admin.BotLogs);
+    const botLogsChannel = GuildService.getChannel(message.client, Constants.Channels.Admin.BotLogs);
     await Promise.all([
       message.author
         .send(

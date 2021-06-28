@@ -1,6 +1,8 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
 import Constants from '../../common/constants';
+import { UserService } from '../../services/user.service';
+import { GuildService } from '../../services/guild.service';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
@@ -8,7 +10,7 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const shouldUnverify = this.container.userService.shouldUnverify(member);
+    const shouldUnverify = UserService.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
     await member
       .send(embed)
@@ -22,7 +24,7 @@ export class WelcomeHandler implements IHandler {
     embed.title = 'Welcome!';
     embed.setURL(this._LION_URL);
 
-    const icon = this.container.guildService.get().iconURL();
+    const icon = GuildService.getGuild(this.container.clientService).iconURL();
     if (icon) {
       embed.setThumbnail(icon);
     }

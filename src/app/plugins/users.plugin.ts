@@ -1,6 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, IUser } from '../../common/types';
 import Constants from '../../common/constants';
+import { GuildService } from '../../services/guild.service';
 
 export default class UserCountPlugin extends Plugin {
   public commandName: string = 'users';
@@ -16,7 +17,7 @@ export default class UserCountPlugin extends Plugin {
 
   public execute(message: IMessage) {
     const members = this.container.clientService.users.cache.array();
-    const totalMembers = this.container.guildService.get().memberCount;
+    const totalMembers = GuildService.getGuild(this.container.clientService).memberCount;
     const onlineMembers = members.filter((member: IUser) => {
       return member.presence.status !== 'offline';
     }).length;

@@ -3,6 +3,7 @@ import Constants from '../../common/constants';
 import { IContainer, IHandler, IServerInfo } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
+import { GuildService } from '../../services/guild.service';
 
 export class MemberCountHandler implements IHandler {
   private _MILESTONE_INTERVAL: number = 100;
@@ -43,7 +44,8 @@ export class MemberCountHandler implements IHandler {
       return;
     }
 
-    const announcementChannel = this.container.guildService.getChannel(
+    const announcementChannel = GuildService.getChannel(
+      member.client,
       Constants.Channels.Info.Announcements
     ) as TextChannel;
 
