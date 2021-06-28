@@ -48,7 +48,7 @@ export class ClassService {
       }
       return ret;
     }
-    return this._channels.get(classType) || new Map<string, GuildChannel>();
+    return this._channels.get(classType) ?? new Map<string, GuildChannel>();
   }
 
   public userIsRegistered(chan: GuildChannel, user: User) {
