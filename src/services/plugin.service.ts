@@ -22,10 +22,6 @@ export class PluginService {
 
   public async initPluginState(container: IContainer): Promise<void> {
 
-    if (!mongoose.connection.readyState) {
-      await container.storageService.connectToDB();
-    }
-
     const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(container.clientService).id });
 
     // Set all of the plugins to the persisted state.

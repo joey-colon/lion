@@ -1,8 +1,16 @@
 import { Bot } from './app/bot';
 import dotenv from 'dotenv';
+import { StorageService } from './services/storage.service';
 
-// Load env vars in.
-dotenv.config();
+(async function main() {
+  // Load env vars in.
+  dotenv.config();
 
-const app = new Bot();
-app.run();
+  // Connect to DB
+  await StorageService.connectToDB();
+
+  const app = new Bot();
+  app.run();
+})();
+
+

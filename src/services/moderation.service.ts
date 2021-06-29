@@ -1,6 +1,5 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
-import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { IMessage, Maybe } from '../common/types';
@@ -106,7 +105,6 @@ export namespace Moderation {
 
 export class ModService {
   constructor(
-    private _storageService: StorageService,
     private _clientService: ClientService,
     private _warningService: WarningService
   ) {}

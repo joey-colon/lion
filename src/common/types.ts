@@ -10,7 +10,6 @@ import { JobService } from '../services/job.service';
 import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
-import { StorageService } from '../services/storage.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
@@ -50,7 +49,6 @@ export interface IContainer extends BottleContainer {
   jobService: JobService;
   storeService: StoreService;
   modService: ModService;
-  storageService: StorageService;
   roleService: RoleService;
   pollService: PollService;
   warningService: WarningService;

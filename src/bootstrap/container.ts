@@ -6,7 +6,6 @@ import { ClassService } from '../services/class.service';
 import { JobService } from '../services/job.service';
 import { StoreService } from '../services/store.service';
 import { ModService } from '../services/moderation.service';
-import { StorageService } from '../services/storage.service';
 import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
@@ -21,11 +20,9 @@ export class Container {
     this._bottle.service('classService', ClassService, 'clientService', 'loggerService');
     this._bottle.service('jobService', JobService);
     this._bottle.service('storeService', StoreService);
-    this._bottle.service('storageService', StorageService, 'loggerService');
     this._bottle.service(
       'modService',
       ModService,
-      'storageService',
       'clientService',
       'guildService',
       'loggerService',
@@ -35,11 +32,10 @@ export class Container {
     this._bottle.service('pollService', PollService, 'clientService');
     this._bottle.service('warningService', WarningService, 'clientService', 'guildService');
     this._bottle.service('twitterService', TwitterService);
-    this._bottle.service('gameLeaderboardService', GameLeaderboardService, 'storageService');
+    this._bottle.service('gameLeaderboardService', GameLeaderboardService);
     this._bottle.service(
       'gameLeaderboardService',
       GameLeaderboardService,
-      'storageService',
       'clientService',
       'loggerService'
     );

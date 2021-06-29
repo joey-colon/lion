@@ -5,7 +5,6 @@ import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
-import { StorageService } from './storage.service';
 
 interface IUserOverallEntry {
   player: User;
@@ -59,7 +58,6 @@ export class GameLeaderboardService {
   };
 
   constructor(
-    private _storageService: StorageService,
     private _clientService: ClientService,
   ) {}
 
