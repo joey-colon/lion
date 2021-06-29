@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
@@ -18,15 +18,11 @@ export default class TaPlugin extends Plugin {
 
   private _ALLOWED_ROLES = [Constants.Roles.TeachingAssistant, Constants.Roles.Professor];
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const [subCommand, ...question] = args;
 
     const channel = message.channel as TextChannel;
-    const isClassChan = this.container.classService.isClassChannel(channel.name);
+    const isClassChan = this.client.classes.isClassChannel(channel.name);
     if (!isClassChan || !message.guild) {
       await message.reply('Please use this command in a class channel');
       return;
@@ -123,7 +119,7 @@ export default class TaPlugin extends Plugin {
       })).filter((e) => e.chanID === chan.id);
 
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
-      const member = GuildService.getGuild(this.container.clientService).members.cache.get(entry.userID);
+      const member = GuildService.getGuild(this.client).members.cache.get(entry.userID);
       if (member) {
         acc.push(member);
       }

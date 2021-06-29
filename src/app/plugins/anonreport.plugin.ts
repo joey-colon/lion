@@ -1,6 +1,7 @@
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 
 export default class DmReportPlugin extends Plugin {
   public commandName: string = 'anonreport';
@@ -14,21 +15,17 @@ export default class DmReportPlugin extends Plugin {
   public usableInDM = true;
   public usableInGuild = true;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public validate(_message: IMessage, args: string[]) {
     return !!args.length;
   }
 
   public async execute(message: IMessage, args: string[]) {
     const maybe_ticket_id = args[0];
-    const isTicketId = this.container.modService.isTicketId(maybe_ticket_id);
+    const isTicketId = this.client.moderation.isTicketId(maybe_ticket_id);
 
     // treat as new report if no ticket_id provided and no guild (dm)
     if (!isTicketId && !message.guild) {
-      await this.container.modService
+      await this.client.moderation
         .fileAnonReport(message)
         .then((ticket_id) =>
           message.reply(
@@ -37,7 +34,7 @@ export default class DmReportPlugin extends Plugin {
               `Also, you can add to this report with \`!${this.name} ${ticket_id} ...\` in this DM.`
           )
         )
-        .catch((e) => this.container.loggerService.error(e));
+        .catch(winston.error);
       return;
     }
 
@@ -45,7 +42,7 @@ export default class DmReportPlugin extends Plugin {
       await message.reply(
         `Please provide a ticket id to respond within a guild. Ex. \`!${
           this.name
-        } ${this.container.modService.generateTicketId(message)} ...\``
+        } ${this.client.moderation.generateTicketId(message)} ...\``
       );
       return;
     }
@@ -54,8 +51,8 @@ export default class DmReportPlugin extends Plugin {
 
     const handleTicket = async () => {
       return await (message.guild
-        ? this.container.modService.respondToAnonReport(maybe_ticket_id, message)
-        : this.container.modService.fileAnonReportWithTicketId(maybe_ticket_id, message));
+        ? this.client.moderation.respondToAnonReport(maybe_ticket_id, message)
+        : this.client.moderation.fileAnonReportWithTicketId(maybe_ticket_id, message));
     };
 
     await handleTicket().then((ticket_id) =>

@@ -39,30 +39,29 @@ export enum GameType {
   ConnectFour,
 }
 
-type GameCollectionTypes = 'tttLeaderboard' | 'connectFourLeaderboard';
+export const gameAliases: Record<GameType, string[]> = {
+  [GameType.TicTacToe]: ['ttt', 'tictactoe'],
+  [GameType.ConnectFour]: ['c4', 'connectfour', 'connect-four'],
+};
+
+const gameEnumToString: Record<GameType, string> = {
+  [GameType.TicTacToe]: 'Tic-Tac-Toe',
+  [GameType.ConnectFour]: 'Connect 4',
+};
+
+const gameEnumToCollection: Record<GameType, mongoose.Model<IGameLeaderBoardEntry>> = {
+  [GameType.TicTacToe]: TTTLeaderboardModel,
+  [GameType.ConnectFour]: C4LeaderboardModel,
+};
 
 export class GameLeaderboardService {
-  public gameAliases: Record<GameType, string[]> = {
-    [GameType.TicTacToe]: ['ttt', 'tictactoe'],
-    [GameType.ConnectFour]: ['c4', 'connectfour', 'connect-four'],
-  };
-
-  private _gameEnumToString: Record<GameType, string> = {
-    [GameType.TicTacToe]: 'Tic-Tac-Toe',
-    [GameType.ConnectFour]: 'Connect 4',
-  };
-
-  private _gameEnumToCollection: Record<GameType, mongoose.Model<IGameLeaderBoardEntry>> = {
-    [GameType.TicTacToe]: this._getCollection('tttLeaderboard'),
-    [GameType.ConnectFour]: this._getCollection('connectFourLeaderboard'),
-  };
 
   constructor(
     private _clientService: ClientService,
   ) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {
-    const leaderboard = this._gameEnumToCollection[game];
+    const leaderboard = gameEnumToCollection[game];
 
     if (!leaderboard) {
       winston.error(`Could not get leaderboard for ${game}`);
@@ -106,12 +105,8 @@ export class GameLeaderboardService {
     );
   }
 
-  private _getCollection(gameType: GameCollectionTypes): mongoose.Model<IGameLeaderBoardEntry> {
-    return gameType === 'tttLeaderboard' ? TTTLeaderboardModel : C4LeaderboardModel;
-  }
-
   public async createOverallLeaderboardEmbed(user: User, game: GameType) {
-    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = this._gameEnumToCollection[game];
+    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = gameEnumToCollection[game];
     if (!leaderboard) {
       winston.error(`Could not get leaderboard for ${game}`);
       return 'Unable to get the leaderboards at this time';
@@ -119,7 +114,7 @@ export class GameLeaderboardService {
 
     const collectionData: IUserOverallEntry[] = await this._parseCollectionData(leaderboard);
     const embed = new MessageEmbed();
-    embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
+    embed.setTitle(`${gameEnumToString[game]} Leaderboard`);
 
     // If we were able to find user's data, put them at the top
     const userFieldData = this._createPlayerFieldData(user, collectionData);
@@ -141,7 +136,7 @@ export class GameLeaderboardService {
   }
 
   public async createPlayerLeaderboardEmbed(user: User, game: GameType) {
-    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = this._gameEnumToCollection[game];
+    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = gameEnumToCollection[game];
     if (!leaderboard) {
       winston.error(`Could not get leaderboard for ${game}`);
       return 'Unable to get the leaderboards at this time';
@@ -156,7 +151,7 @@ export class GameLeaderboardService {
     const { name, value } = userFieldData;
 
     const embed = new MessageEmbed();
-    embed.setTitle(`${this._gameEnumToString[game]} Leaderboard`);
+    embed.setTitle(`${gameEnumToString[game]} Leaderboard`);
     embed.addField(name, value);
     return embed;
   }
@@ -193,7 +188,7 @@ export class GameLeaderboardService {
 
   public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
     const guildId = GuildService.getGuild(this._clientService).id;
-    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = this._gameEnumToCollection[gameType];
+    const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
       winston.error(`Could not get leaderboard for ${gameType}`);
       return 'Unable to get the leaderboards at this time';
@@ -229,7 +224,7 @@ export class GameLeaderboardService {
     });
 
     const embed = new MessageEmbed();
-    embed.setTitle(`${this._gameEnumToString[gameType]} Matchup`);
+    embed.setTitle(`${gameEnumToString[gameType]} Matchup`);
     embed.addField(
       // `${userRank + 1}. ${userEntry.player.username} (You)`,
       `${userOne.username} vs ${userTwo.username}`,

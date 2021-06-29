@@ -1,9 +1,10 @@
 import { GuildMember } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IHandler } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { MessageService } from '../../services/message.service';
 
 export class UserUpdateHandler implements IHandler {
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public execute(oldUser: GuildMember, newUser: GuildMember): void {
     if (oldUser.displayName !== newUser.displayName) {

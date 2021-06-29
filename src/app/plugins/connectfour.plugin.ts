@@ -2,8 +2,9 @@ import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } f
 import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
-import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import { ChannelType, IMessage, Maybe } from '../../common/types';
+import { ClientService } from '../../services/client.service';
+import { GameLeaderboardService, GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class ConnectFourPlugin extends Plugin {
   public commandName: string = 'connect4';
@@ -14,10 +15,13 @@ export default class ConnectFourPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
 
+  private _leaderBoard: GameLeaderboardService;
+
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
-  constructor(public container: IContainer) {
-    super();
+  constructor(client: ClientService) {
+    super(client);
+    this._leaderBoard = new GameLeaderboardService(client);
   }
 
   public async execute(message: IMessage) {
@@ -46,7 +50,7 @@ export default class ConnectFourPlugin extends Plugin {
     const game = new ConnectFourGame(
       message.author,
       oppMember.user,
-      message.mentions.members?.first()?.id === this.container.clientService.user?.id
+      message.mentions.members?.first()?.id === this.client.user?.id
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
@@ -102,7 +106,7 @@ export default class ConnectFourPlugin extends Plugin {
 
       // update the leaderboard for the author of the game
       const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
+        this._leaderBoard.updateLeaderboard(
           message.author,
           GameType.ConnectFour,
           {
@@ -110,7 +114,7 @@ export default class ConnectFourPlugin extends Plugin {
             result: convertToResult(message.author),
           }
         ),
-        this.container.gameLeaderboardService.updateLeaderboard(
+        this._leaderBoard.updateLeaderboard(
           oppMember.user,
           GameType.ConnectFour,
           {

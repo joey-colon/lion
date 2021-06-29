@@ -1,7 +1,7 @@
 import { GuildChannel, Snowflake, TextChannel } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { ClassPinModel } from '../../schemas/class.schema';
 
 export default class StorePinsPlugin extends Plugin {
@@ -15,13 +15,9 @@ export default class StorePinsPlugin extends Plugin {
 
   private _state: boolean = false;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const classChannels = Array.from(
-      this.container.classService.getClasses(ClassType.ALL).values()
+      this.client.classes.getClasses(ClassType.ALL).values()
     );
 
     if (!this._state) {

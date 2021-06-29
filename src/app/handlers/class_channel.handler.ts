@@ -1,9 +1,10 @@
-import { IContainer, IHandler } from '../../common/types';
+import { IHandler } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 
 export class ClassChannelHandler implements IHandler {
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public execute(): void {
-    this.container.classService.updateClasses();
+    this.client.classes.updateClasses();
   }
 }

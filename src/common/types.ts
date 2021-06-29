@@ -3,19 +3,12 @@
 import { AxiosResponse } from 'axios';
 import { IContainer as BottleContainer } from 'bottlejs';
 import * as discord from 'discord.js';
-import { ChannelService } from '../services/channel.service';
-import { ClassService } from '../services/class.service';
-import { ClientService } from '../services/client.service';
 import { JobService } from '../services/job.service';
-import { PluginService } from '../services/plugin.service';
 import { StoreService } from '../services/store.service';
-import { ModService } from '../services/moderation.service';
-import { RoleService } from '../services/role.service';
 import { PollService } from '../services/poll.service';
 import { WarningService } from '../services/warning.service';
-import { TwitterService } from '../services/twitter.service';
-import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import { Document } from 'mongoose';
+import { ClientService } from '../services/client.service';
 
 export interface IConfig {
   token: string;
@@ -42,18 +35,10 @@ export interface IPlugin {
 }
 
 export interface IContainer extends BottleContainer {
-  clientService: ClientService;
-  pluginService: PluginService;
-  channelService: ChannelService;
-  classService: ClassService;
   jobService: JobService;
   storeService: StoreService;
-  modService: ModService;
-  roleService: RoleService;
   pollService: PollService;
   warningService: WarningService;
-  twitterService: TwitterService;
-  gameLeaderboardService: GameLeaderboardService;
 }
 
 export interface IMessage extends discord.Message {}
@@ -69,6 +54,7 @@ export interface IHttpResponse extends AxiosResponse {}
 export type Voidable = Promise<void> | void;
 
 export interface IHandler {
+  readonly client: ClientService;
   execute(...args: any[]): Voidable;
 }
 
@@ -105,7 +91,7 @@ export interface IClassRequest {
 export interface IJob {
   name: string;
   interval: number;
-  execute(container?: IContainer): void;
+  execute(container?: ClientService): void;
 }
 
 export interface IStore {

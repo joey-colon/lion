@@ -1,11 +1,11 @@
 import { ExampleJob } from '../app/jobs/example.job';
 import { Job } from '../common/job';
-import { IContainer } from '../common/types';
 import { UnBanJob } from '../app/jobs/unban.job';
 import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
+import { ClientService } from './client.service';
 
 export class JobService {
   public jobs: Job[] = [
@@ -18,12 +18,12 @@ export class JobService {
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
-  public register(job: Job, container: IContainer) {
+  public register(job: Job, client: ClientService) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
     this._runningJobs[job.name] = setInterval(() => {
-      return job.execute(container);
+      return job.execute(client);
     }, job.interval);
   }
 

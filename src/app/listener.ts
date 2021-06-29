@@ -6,8 +6,10 @@ import {
   PartialMessage,
   TextChannel,
 } from 'discord.js';
+import winston from 'winston';
 import Constants from '../common/constants';
-import { IContainer, IHandler, IMessage, Mode } from '../common/types';
+import { IHandler, IMessage, Mode } from '../common/types';
+import { ClientService } from '../services/client.service';
 import { GuildService } from '../services/guild.service';
 import { HandlerService } from '../services/handler.service';
 export class Listener {
@@ -19,29 +21,29 @@ export class Listener {
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
 
-  constructor(public container: IContainer) {
+  constructor(public client: ClientService) {
     this._initializeHandlers();
 
-    this.container.clientService.on('channelCreate', async () => {
+    this.client.on('channelCreate', async () => {
       await this._executeHandlers(this._channelHandlers);
     });
-    this.container.clientService.on('channelDelete', async () => {
+    this.client.on('channelDelete', async () => {
       await this._executeHandlers(this._channelHandlers);
     });
-    this.container.clientService.on('channelUpdate', async () => {
+    this.client.on('channelUpdate', async () => {
       await this._executeHandlers(this._channelHandlers);
     });
-    this.container.clientService.on('messageReactionAdd', async (reaction, user) => {
+    this.client.on('messageReactionAdd', async (reaction, user) => {
       await this._executeHandlers(this._reactionHandlers, reaction, user);
     });
 
-    this.container.clientService.on('ready', async () => {
-      this.container.loggerService.info(`Loaded ${this.container.jobService.size()} jobs...`);
+    this.client.on('ready', async () => {
+      winston.info(`Loaded ${this.client.jobService.size()} jobs...`);
 
       // Load in plugin states.
-      await this.container.pluginService.initPluginState(this.container);
+      await this.client.pluginService.initPluginState(this.client);
 
-      this.container.loggerService.info('Lion is now running!');
+      winston.info('Lion is now running!');
 
       // Don't need to send this when testing
       // This is useful for knowing when the bot crashed in production and restarts
@@ -50,7 +52,7 @@ export class Listener {
       }
 
       const notificationChannel = GuildService
-        .getChannel(this.container.clientService, Constants.Channels.Public.LionProjectGithub) as TextChannel;
+        .getChannel(this.client, Constants.Channels.Public.LionProjectGithub) as TextChannel;
 
       const embed = new MessageEmbed();
       embed
@@ -62,18 +64,18 @@ export class Listener {
       notificationChannel.send(embed);
     });
 
-    this.container.clientService.on('message', async (message: IMessage) => {
+    this.client.on('message', async (message: IMessage) => {
       await this._handleMessageOrMessageUpdate(message, false);
     });
 
-    this.container.clientService.on(
+    this.client.on(
       'messageUpdate',
       async (_old: Message | PartialMessage, newMessage: Message | PartialMessage) => {
         await this._handleMessageOrMessageUpdate(newMessage as Message, true);
       }
     );
 
-    this.container.clientService.on(
+    this.client.on(
       'guildMemberUpdate',
       async (
         oldUser: GuildMember | PartialGuildMember,
@@ -83,13 +85,13 @@ export class Listener {
       }
     );
 
-    this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
+    this.client.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
   }
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
-    if (message.author.id === this.container.clientService.user?.id) {
+    if (message.author.id === this.client.user?.id) {
       return;
     }
 
@@ -121,7 +123,7 @@ export class Listener {
     }
 
     try {
-      this.container.loggerService.debug(
+      winston.debug(
         `Attempting extra lookup of ${message.author.tag} to a GuildMember`
       );
 
@@ -131,12 +133,12 @@ export class Listener {
       // message.member = member;
 
       if (!member) {
-        this.container.loggerService.warn(
+        winston.warn(
           `Could not resolve ${message.author.tag} to a GuildMember`
         );
       }
     } catch (e) {
-      this.container.loggerService.error(
+      winston.error(
         `While attempting to look up ${message.author.tag} as a GuildMember.`,
         e
       );
@@ -145,31 +147,31 @@ export class Listener {
 
   private _initializeHandlers(): void {
     HandlerService.messageHandlers.forEach((Handler) => {
-      this._messageHandlers.push(new Handler(this.container));
+      this._messageHandlers.push(new Handler(this.client));
     });
 
     HandlerService.messageUpdateHandlers.forEach((Handler) => {
-      this._messageUpdateHandlers.push(new Handler(this.container));
+      this._messageUpdateHandlers.push(new Handler(this.client));
     });
 
     HandlerService.privateMessageHandlers.forEach((Handler) => {
-      this._privateMessageHandlers.push(new Handler(this.container));
+      this._privateMessageHandlers.push(new Handler(this.client));
     });
 
     HandlerService.channelHandlers.forEach((Handler) => {
-      this._channelHandlers.push(new Handler(this.container));
+      this._channelHandlers.push(new Handler(this.client));
     });
 
     HandlerService.userUpdateHandlers.forEach((Handler) => {
-      this._userUpdateHandlers.push(new Handler(this.container));
+      this._userUpdateHandlers.push(new Handler(this.client));
     });
 
     HandlerService.memberAddHandlers.forEach((Handler) => {
-      this._memberAddHandlers.push(new Handler(this.container));
+      this._memberAddHandlers.push(new Handler(this.client));
     });
 
     HandlerService.reactionHandlers.forEach((Handler) => {
-      this._reactionHandlers.push(new Handler(this.container));
+      this._reactionHandlers.push(new Handler(this.client));
     });
   }
 
@@ -179,7 +181,7 @@ export class Listener {
       try {
         await handler.execute(...args);
       } catch (e) {
-        this.container.loggerService.error(e);
+        winston.error(e);
       }
     }));
   }

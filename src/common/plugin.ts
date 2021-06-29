@@ -1,11 +1,13 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
+import { ChannelType, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 import { MessageService } from '../services/message.service';
 import { GuildService } from '../services/guild.service';
+import { ClientService } from '../services/client.service';
+import { RoleService } from '../services/role.service';
+import { ChannelService } from '../services/channel.service';
+import winston from 'winston';
 
 export abstract class Plugin implements IPlugin {
-  public abstract container: IContainer;
-
   public abstract get commandName(): string;
 
   public abstract get name(): string;
@@ -28,9 +30,15 @@ export abstract class Plugin implements IPlugin {
 
   public isActive: boolean = true;
 
+  public client: ClientService;
+
   // Typical defaults for existing commands.
   public usableInDM = false;
   public usableInGuild = true;
+
+  constructor(client: ClientService) {
+    this.client = client;
+  }
 
   public validate(message: IMessage, args: string[]) {
     if (!this.commandPattern) {
@@ -43,7 +51,7 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = MessageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-      const id = GuildService.getChannel(this.container.client, this.pluginChannelName)!.id;
+      const id = GuildService.getChannel(this.client, this.pluginChannelName)!.id;
       message.reply(`Please use this command in the <#${id}> channel.`);
       return false;
     }
@@ -55,13 +63,13 @@ export abstract class Plugin implements IPlugin {
     }
 
     const minRoleToRun = this.minRoleToRun ?? 0;
-    const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
+    const hasRolePerms = RoleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
       message.reply('You must have a higher role to run this command.');
       return false;
     }
 
-    const response = this.container.channelService.hasPermission(channelName, this.permission);
+    const response = ChannelService.hasPermission(channelName, this.permission);
     if (!response) {
       const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
 
@@ -85,11 +93,11 @@ export abstract class Plugin implements IPlugin {
         const id = channels
           .filter((channel) => {
             return GuildService
-              .getChannel(this.container.clientService, channel)!
+              .getChannel(this.client, channel)!
               .permissionsFor(message.member ?? '')
               ?.has('VIEW_CHANNEL');
           })
-          .map((room) => GuildService.getChannel(this.container.clientService, room)!.id);
+          .map((room) => GuildService.getChannel(this.client, room)!.id);
 
         if (id.length === 0) {
           message.reply(`${baseReply} There are no permanent channels of this type.`);
@@ -115,7 +123,7 @@ export abstract class Plugin implements IPlugin {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _errorGen(chanName: string[], err: any): void {
-    this.container.loggerService.warn(
+    winston.warn(
       `Expected ${chanName.join(
         ' & '
       )} in Constants.ts, but one or more were missing.  Error info:\n ${err}`

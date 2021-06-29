@@ -194,7 +194,7 @@ export class ClassService {
   }
 
   private _addClasses(): void {
-    this._guild.channels.cache.forEach((channel) => {
+    GuildService.getGuild(this._clientService).channels.cache.forEach((channel) => {
       if (!channel.parentID) {
         return;
       }
@@ -340,7 +340,7 @@ export class ClassService {
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [
         {
-          id: everyoneRole!.id,
+          id: everyoneRole.id,
           deny: ['VIEW_CHANNEL'],
         },
         {

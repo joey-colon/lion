@@ -3,17 +3,23 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
+import { ClientService } from '../../services/client.service';
+import { ChannelService } from '../../services/channel.service';
+import winston from 'winston';
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
+  public client: ClientService;
 
-  constructor(public container: types.IContainer) {}
+  constructor(client: ClientService) {
+    this.client = client;
+  }
 
   public async execute(message: types.IMessage): Promise<void> {
     const command = this.build(message.content);
-    const plugins = this.container.pluginService.plugins;
-    const aliases = this.container.pluginService.aliases;
+    const plugins = this.client.pluginService.plugins;
+    const aliases = this.client.pluginService.aliases;
 
     // checks to see if the user is actually talking to the bot
     if (!command) {
@@ -37,8 +43,8 @@ export class CommandHandler implements types.IHandler {
   }
 
   private async _tryFuzzySearch(message: types.IMessage, command: types.ICommand, isDM: boolean) {
-    const { plugins, aliases } = this.container.pluginService;
-    const allNames = Array.from(Object.keys(this.container.pluginService.aliases));
+    const { plugins, aliases } = this.client.pluginService;
+    const allNames = Array.from(Object.keys(this.client.pluginService.aliases));
 
     const currentChannelName = (message.channel as TextChannel).name.toLowerCase();
     const validCommandsInChannel = allNames.filter((name) => {
@@ -46,7 +52,7 @@ export class CommandHandler implements types.IHandler {
 
       // Check channel type
       const permLevel = plugin.permission;
-      if (permLevel !== this.container.channelService.getChannelType(currentChannelName)) {
+      if (permLevel !== ChannelService.getChannelType(currentChannelName)) {
         return false;
       }
 
@@ -152,15 +158,15 @@ export class CommandHandler implements types.IHandler {
     };
 
     try {
-      this.container.loggerService.info(JSON.stringify(pEvent));
+      winston.info(JSON.stringify(pEvent));
       await plugin.execute(message, command.args);
 
       pEvent.status = 'fulfillCommand';
-      this.container.loggerService.info(JSON.stringify(pEvent));
+      winston.info(JSON.stringify(pEvent));
     } catch (e) {
       pEvent.status = 'error';
       pEvent.error = e;
-      this.container.loggerService.error(JSON.stringify(pEvent));
+      winston.error(JSON.stringify(pEvent));
     }
   }
 }

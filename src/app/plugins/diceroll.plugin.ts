@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 
 export default class DiceRollPlugin extends Plugin {
   public commandName: string = 'dice';
@@ -9,10 +9,6 @@ export default class DiceRollPlugin extends Plugin {
   public pluginAlias = ['d', 'dice'];
   public permission: ChannelType = ChannelType.Public;
   public commandPattern: RegExp = /^(\d+)?$/;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args: string[]) {
     const upperBound: number = args.length > 0 ? +args[0] : 6;

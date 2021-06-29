@@ -1,5 +1,5 @@
-import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
+import { ClientService } from '../../services/client.service';
 
 export class InactiveVoiceJob extends Job {
   public interval: number = 1000 * 60 * 10; // Every 10 mintues
@@ -9,21 +9,21 @@ export class InactiveVoiceJob extends Job {
     super();
   }
 
-  public async execute(container: IContainer) {
-    const vcs = container.classService.getVoiceChannels();
+  public async execute(client: ClientService) {
+    const vcs = client.classes.getVoiceChannels();
 
     for (const vcObj of vcs) {
       const [name, vc] = vcObj;
 
       // Make sure channel wasnt deleted already
       if (vc.voiceChan.deleted) {
-        await container.classService.deleteVoiceChan(name);
+        await client.classes.deleteVoiceChan(name);
         continue;
       }
 
       const newUsers = vc.voiceChan.members.size;
       if (newUsers === vc.lastUsers && vc.lastUsers === 0) {
-        await container.classService
+        await client.classes
           .deleteVoiceChan(name)
           .then(
             async () =>
@@ -33,7 +33,7 @@ export class InactiveVoiceJob extends Job {
           );
       } else {
         vc.lastUsers = newUsers;
-        container.classService.updateClassVoice(name, vc);
+        client.classes.updateClassVoice(name, vc);
       }
     }
   }

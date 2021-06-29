@@ -1,13 +1,14 @@
 import { EmojiIdentifierResolvable } from 'discord.js';
-import { IContainer, IHandler, IMessage, Maybe } from '../../common/types';
+import { IHandler, IMessage, Maybe } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 
 export class LionPingHandler implements IHandler {
   private _reactEmoji: Maybe<EmojiIdentifierResolvable> = null;
 
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public async execute(message: IMessage) {
-    if (!this.container.clientService.user) {
+    if (!this.client.user) {
       return;
     }
 
@@ -18,7 +19,7 @@ export class LionPingHandler implements IHandler {
     }
 
     // Check if lion was mentioned.
-    const lionId = this.container.clientService.user.id;
+    const lionId = this.client.user.id;
     if (!message.mentions.has(lionId)) { 
       return;
     }

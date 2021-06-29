@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
+import { IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
 import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
 import { GuildService } from '../../services/guild.service';
@@ -17,10 +17,6 @@ export default class BroadcastPlugin extends Plugin {
   private _CHANS_TO_SEND: GuildChannel[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args: string[]) {
     const [subCommand, ...subCommandArgs] = args;
@@ -107,7 +103,7 @@ export default class BroadcastPlugin extends Plugin {
       const classType: Maybe<ClassType> = this._strToClassType(name.toUpperCase());
       if (classType) {
         const classes = this._getClassesFromClassMap(
-          this.container.classService.getClasses(classType)
+          this.client.classes.getClasses(classType)
         );
         this._CHANS_TO_SEND.push(...classes);
         return;

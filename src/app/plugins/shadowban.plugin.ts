@@ -1,8 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { CategoryChannel, Collection, Guild, GuildChannel, User } from 'discord.js';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
 
 export default class ShadowBanPlugin extends Plugin {
   public commandName: string = 'shadowban';
@@ -24,9 +25,9 @@ export default class ShadowBanPlugin extends Plugin {
     'AUDIO CHANNELS',
   ];
 
-  constructor(public container: IContainer) {
-    super();
-    this._guild = GuildService.getGuild(container.clientService);
+  constructor(public client: ClientService) {
+    super(client);
+    this._guild = GuildService.getGuild(client);
   }
 
   public async execute(message: IMessage, args: string[]) {

@@ -1,8 +1,9 @@
 import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import * as espn from '../__generated__/espn';
+import axios from 'axios';
 
 export default class ScoresPlugin extends Plugin {
   public commandName: string = 'scores';
@@ -19,10 +20,6 @@ export default class ScoresPlugin extends Plugin {
     ['mlb', 'http://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard'],
     ['nba', 'http://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'],
   ]);
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args: string[]) {
     const [sport, ...teamArg] = args;
@@ -71,7 +68,7 @@ export default class ScoresPlugin extends Plugin {
   }
 
   private async _getGames(url: string): Promise<espn.IEvent[]> {
-    const response = (await this.container.httpService.get(url)).data;
+    const response = (await axios.get(url)).data;
     const responseData: espn.ISample = (response as Object) as espn.ISample;
     return responseData.events;
   }

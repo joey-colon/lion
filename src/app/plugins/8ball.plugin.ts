@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 export default class EightBallPlugin extends Plugin {
@@ -23,10 +23,6 @@ export default class EightBallPlugin extends Plugin {
     'Juan bullies bread, causing a chain reaction of unfavorable events. Probably not.',
     'bread gifts you with all the luck in the loaf. The best outcome is forseen.',
   ];
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public execute(message: IMessage) {
     const response = this._responses[Math.floor(Math.random() * this._responses.length)];

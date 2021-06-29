@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IHttpResponse } from '../../common/types';
+import { IMessage, ChannelType, IHttpResponse } from '../../common/types';
 import { load } from 'cheerio';
 import axios from 'axios';
+import winston from 'winston';
 
 class Garage {
   public name: string = '';
@@ -86,17 +87,12 @@ export default class GaragePlugin extends Plugin {
         return (this._GARAGES = this._processResponse(response.data));
       })
       .catch((err) => {
-        this.container.loggerService.warn(err);
+        winston.warn(err);
         return (this._GARAGES = []);
       });
 
     return this._GARAGES;
   }
-
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage) {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';

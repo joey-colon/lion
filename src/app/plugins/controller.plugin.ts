@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 
 export default class PluginControl extends Plugin {
   public commandName: string = 'controller';
@@ -9,15 +9,11 @@ export default class PluginControl extends Plugin {
   public permission: ChannelType = ChannelType.Admin;
   public commandPattern: RegExp = /^(deactivate|activate) (?!\s*$).+/;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]): Promise<void> {
     const [method, pluginName] = args;
 
     try {
-      await this.container.pluginService.setPluginState(this.container, pluginName, method === 'activate') ;
+      await this.client.pluginService.setPluginState(pluginName, method === 'activate') ;
     } catch(e) {
       await message.channel.send(e.message);
       return;

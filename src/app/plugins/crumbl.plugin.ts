@@ -2,10 +2,11 @@
 
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
 import { MessageService } from '../../services/message.service';
+import winston from 'winston';
 
 export default class CrumblPlugin extends Plugin {
   public commandName: string = 'crumbl';
@@ -19,10 +20,6 @@ export default class CrumblPlugin extends Plugin {
   private _buildId: string = '';
   private _lastPost: Maybe<IMessage> = null;
   private _regex: RegExp = /"buildId":"(.*?)"/;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   // buildId string is the first element, actual buildId is the second.
   public matchId(data: string): string {
@@ -54,13 +51,13 @@ export default class CrumblPlugin extends Plugin {
         const data: string = response.data;
         this._buildId = this.matchId(data);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
 
     await axios
       .get(`https://crumblcookies.com/_next/data/${this._buildId}/index.json`)
       .then(async (blob: IHttpResponse) => {
         if (this._buildId === '') {
-          this.container.loggerService.warn('The build id is empty');
+          winston.warn('The build id is empty');
           await message.reply('We could not retrieve the cookies at this time :(.');
           return;
         }
@@ -70,9 +67,9 @@ export default class CrumblPlugin extends Plugin {
         await MessageService
           .sendPagedEmbed(message, pages)
           .then(async (sentMsg) => await this._deleteOldPost(message, sentMsg))
-          .catch((err) => this.container.loggerService.warn(err));
+          .catch(winston.warn);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private async _deleteOldPost(listCall: IMessage, newPosting: IMessage) {

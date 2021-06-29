@@ -1,6 +1,6 @@
 import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
 
 export default class TwitterPlugin extends Plugin {
@@ -26,13 +26,7 @@ export default class TwitterPlugin extends Plugin {
 
   // The twitter API returns a min of 5 tweets, but thats a bit much for our bot, so we'll do 3 instead.
   private _maxSize = 3;
-  private _twitter = new TwitterService();
-    
-  public constructor(public container: IContainer) {
-    super();
-    this._twitter = container.twitterService;
-  }
-
+  
   public async execute(message: IMessage, args: string[]) {
     const [param] = args;
 
@@ -53,7 +47,7 @@ export default class TwitterPlugin extends Plugin {
     await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')]);
 
     // Fetch respective tweets.
-    const response = await this._twitter.getLatestTweets(accountId, this._maxSize);
+    const response = await TwitterService.getLatestTweets(accountId, this._maxSize);
     const embeds = await this._createEmbeds(response, accountId);
 
     // Lazy-load webhook
@@ -65,7 +59,7 @@ export default class TwitterPlugin extends Plugin {
   }
 
   private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
-    const user = await this._twitter.getUser(id);
+    const user = await TwitterService.getUser(id);
 
     return tweets.data.map(tweet => {
       const embed = new MessageEmbed();

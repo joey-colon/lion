@@ -20,15 +20,15 @@ export const GuildService = {
     }
   },
 
-  getRole(client: Client, roleName: string): Role | undefined {
+  getRole(client: Client, roleName: string): Role {
     return this.getGuild(client)
       .roles.cache.filter((r) => r.name === roleName)
-      .first();
+      .first()!;
   },
 
-  getChannel(client: Client, chanName: string): GuildChannel | undefined {
+  getChannel(client: Client, chanName: string): GuildChannel {
     return this.getGuild(client)
       .channels.cache.filter((c) => c.name === chanName)
-      .first();
+      .first()!;
   }
 };

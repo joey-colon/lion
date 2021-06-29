@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { MessageEmbed } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { MessageService } from '../../services/message.service';
 
 export default class DogPlugin extends Plugin {
@@ -24,8 +26,8 @@ export default class DogPlugin extends Plugin {
   private _breedEmbed: Maybe<MessageEmbed>;
   private _subBreedEmbed: Maybe<MessageEmbed>;
 
-  constructor(public container: IContainer) {
-    super();
+  constructor(client: ClientService) {
+    super(client);
     axios
       .get(`${this._API_URL}breeds/list/all`)
       .then((response: IHttpResponse) => {
@@ -53,7 +55,7 @@ export default class DogPlugin extends Plugin {
           (a: IDogSubBreed, b: IDogSubBreed) => a.subBreed.length - b.subBreed.length
         );
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -119,9 +121,7 @@ export default class DogPlugin extends Plugin {
           name: 'image.jpg',
         });
       })
-      .catch((err) => {
-        this.container.loggerService.warn(err);
-      });
+      .catch(winston.warn);
   }
 
   private _makeBreedEmbed(): MessageEmbed {

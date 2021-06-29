@@ -1,5 +1,6 @@
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 
 export default class DelRolesPlugin extends Plugin {
   public commandName: string = 'delroles';
@@ -8,10 +9,6 @@ export default class DelRolesPlugin extends Plugin {
   public usage: string = 'delroles <role> [...roles]';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public validate(message: IMessage, args: string[]) {
     return !!args.length;
@@ -32,7 +29,7 @@ export default class DelRolesPlugin extends Plugin {
         await member.roles.remove(role);
         roles_deleted.push(role.name);
       } catch (err) {
-        this.container.loggerService.error(
+        winston.error(
           `User ${member.user.tag} attempted to remove the role ${elem} but failed: ${err}`
         );
       }

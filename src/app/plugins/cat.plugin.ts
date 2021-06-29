@@ -1,9 +1,11 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
 import { MessageService } from '../../services/message.service';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 class Breed {
   public name: string = '';
@@ -23,8 +25,8 @@ export default class CatPlugin extends Plugin {
   private _breeds: Breed[] = [];
   private _embedBreeds: Maybe<MessageEmbed>;
 
-  constructor(public container: IContainer) {
-    super();
+  constructor(client: ClientService) {
+    super(client);
     // creates list of breeds
     axios
       .get(`${this._API_URL}breeds`)
@@ -38,7 +40,7 @@ export default class CatPlugin extends Plugin {
           };
         });
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -48,7 +50,7 @@ export default class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await message.reply((this._getListEmbed()) || 'Failed to load breeds.');
+      await message.reply((this._getListEmbed()) ?? 'Failed to load breeds.');
       return;
     }
 
@@ -66,7 +68,7 @@ export default class CatPlugin extends Plugin {
       return;
     }
 
-    this.container.loggerService.debug(searchCom);
+    winston.debug(searchCom);
 
     // receives the according info and posts
     await axios
@@ -77,7 +79,7 @@ export default class CatPlugin extends Plugin {
           name:'image.jpg'
         });
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private _getListEmbed() {

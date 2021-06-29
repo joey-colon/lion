@@ -1,24 +1,24 @@
 import { Store } from '../common/store';
 
 export class StoreService {
-  public stores: Store[] = [];
-  private _stores: { [storeName: string]: Store } = {};
+  public static STORES: Store[] = [];
+  private static _stores: { [storeName: string]: Store } = {};
 
-  public register(store: Store) {
-    if (this._stores[store.name]) {
+  public static register(store: Store) {
+    if (StoreService._stores[store.name]) {
       throw new Error(`Store ${store.name} already exists as a store.`);
     }
-    this._stores[store.name] = store;
+    StoreService._stores[store.name] = store;
   }
 
-  public get(storeName: string): Store {
-    if (!this._stores[storeName]) {
+  public static get(storeName: string): Store {
+    if (!StoreService._stores[storeName]) {
       throw new Error(`Unable to locate ${storeName}`);
     }
-    return this._stores[storeName];
+    return StoreService._stores[storeName];
   }
 
-  public reset() {
-    this._stores = {};
+  public static reset() {
+    StoreService._stores = {};
   }
 }

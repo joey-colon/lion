@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import winston from 'winston';
 
 export default class WeatherPlugin extends Plugin {
   public commandName: string = 'weather';
@@ -12,9 +13,6 @@ export default class WeatherPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
   private _defaultLocation: string = 'Orlando';
   private _forecastNum: number = 3;
-  constructor(public container: IContainer) {
-    super();
-  }
 
   private _getWeather(type: string, message: IMessage): string {
     const inputRegex: RegExp = /^!weather ([a-zA-Z ]+|\d{5})$/;
@@ -299,7 +297,7 @@ export default class WeatherPlugin extends Plugin {
   public async execute(message: IMessage) {
     if (!process.env.WEATHER_TOKEN) {
       await message.channel.send('Weather code is setup incorrectly');
-      this.container.loggerService.error('Weather code is setup incorrectly');
+      winston.error('Weather code is setup incorrectly');
       return;
     }
 

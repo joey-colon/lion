@@ -1,6 +1,6 @@
 import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
 import { GuildService } from '../../services/guild.service';
 
@@ -17,14 +17,10 @@ export default class CheckClassesPlugin extends Plugin {
   private _MAX_CHAR_LIMIT: number = 2000;
   private _MAX_CHANS_SHOWN: number = 10;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const targetUserName = args.join(' ');
 
-    const member = GuildService.getGuild(this.container.clientService)
+    const member = GuildService.getGuild(this.client)
       .members.cache.filter((m) => m.user.tag === targetUserName)
       .first();
     if (!member) {
@@ -32,7 +28,7 @@ export default class CheckClassesPlugin extends Plugin {
       return;
     }
 
-    const classes = this.container.classService.getClasses(ClassType.ALL);
+    const classes = this.client.classes.getClasses(ClassType.ALL);
     const chansContainingUser = Array.from(classes.values()).filter((chan) =>
       Boolean(chan.permissionsFor(member.id)?.has('VIEW_CHANNEL'))
     );

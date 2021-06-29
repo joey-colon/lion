@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import {
   MessageEmbed,
   MessageReaction,
@@ -17,13 +17,9 @@ export default class CreateClassVoice extends Plugin {
   public pluginAlias = ['createvc'];
   public permission: ChannelType = ChannelType.Private;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage) {
     const chan = message.channel as TextChannel;
-    const voiceChan = await this.container.classService.createVoiceChan(message.author, chan);
+    const voiceChan = await this.client.classes.createVoiceChan(message.author, chan);
     if (!voiceChan) {
       await message.reply('There is already a voice channel for this class');
       return;
@@ -47,7 +43,7 @@ export default class CreateClassVoice extends Plugin {
       await voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
     });
 
-    this.container.classService.updateClassVoice(
+    this.client.classes.updateClassVoice(
       chan.name,
       new ClassVoiceChan(voiceChan, chan, collector, voiceChan.members.size)
     );

@@ -49,20 +49,18 @@ export type TwitterTimelineResponse = {
   }
 };
 
-export class TwitterService {
-  private _bearerToken = process.env.TWITTER_BEARER_TOKEN;
-  private _http = axios.create();
+const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+const http = axios.create();
 
-  public constructor() {
-    // Hook the requests with the bearer token
-    this._http.interceptors.request.use((config): AxiosRequestConfig => {
-      config.headers = {
-        Authorization: `Bearer ${this._bearerToken}` 
-      };
-      return config;
-    });
-  }
+// Hook the requests with the bearer token
+http.interceptors.request.use((config): AxiosRequestConfig => {
+  config.headers = {
+    Authorization: `Bearer ${bearerToken}` 
+  };
+  return config;
+});
 
+export const TwitterService = {
   /**
    * Gets the latest tweets from the given user.
    * 
@@ -70,7 +68,7 @@ export class TwitterService {
    * @param max The max amount of tweets to return. (A number between 0 and 100)
    * @returns Twitter Response
    */
-  public async getLatestTweets(id: string, max: number = 5): Promise<TwitterTimelineResponse> {
+  async getLatestTweets(id: string, max: number = 5): Promise<TwitterTimelineResponse> {
 
     // The twitter API is quite conservative when it comes to returning data. You'll need to 
     // tell the API explicity the fields you want access to, hence these params.
@@ -83,7 +81,7 @@ export class TwitterService {
       }
     };
 
-    const response = await this._http
+    const response = await http
       .get<TwitterTimelineResponse>(`https://api.twitter.com/2/users/${id}/tweets`, config);
 
     // The twitter API returns a minimum of 5 tweets so, if 
@@ -94,7 +92,7 @@ export class TwitterService {
     }
     
     return response.data;
-  }
+  },
 
   /**
    * Gets the details of the given twitter user.
@@ -102,7 +100,7 @@ export class TwitterService {
    * @param id The ID of the user to fetch
    * @returns The twitter user's info
    */
-  public async getUser(id: string): Promise<TwitterUser> {
+  async getUser(id: string): Promise<TwitterUser> {
 
     const config = {
       params: {
@@ -110,8 +108,8 @@ export class TwitterService {
       }
     };
 
-    const response = await this._http
+    const response = await http
       .get<TwitterUserResponse>(`https://api.twitter.com/2/users/${id}`, config);
     return response.data.data;
   }
-}
+};

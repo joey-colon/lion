@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { GuildService } from '../../services/guild.service';
 
 export default class DeleteClassChannelsPlugin extends Plugin {
@@ -12,12 +12,8 @@ export default class DeleteClassChannelsPlugin extends Plugin {
 
   private _CHAN_NAME: RegExp = /^[a-z]{3}[0-9]{4}[a-z]?.*$/;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage) {
-    const channels = GuildService.getGuild(this.container.clientService)
+    const channels = GuildService.getGuild(this.client)
       .channels.cache.filter((chan) => chan.type === 'text' && !!chan.name.match(this._CHAN_NAME));
     const numChannels = channels.size;
     const deleteCaller = message.author.tag;

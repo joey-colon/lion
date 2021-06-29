@@ -1,6 +1,6 @@
 import { MessageAttachment } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, ChannelType, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 import axios from 'axios';
 
 export default class EquationPlugin extends Plugin {
@@ -13,10 +13,6 @@ export default class EquationPlugin extends Plugin {
   public pluginAlias: string[] = ['eqn'];
 
   private static readonly _BASE_URL = 'https://chart.googleapis.com/chart';
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args: string[]): Promise<void> {
 

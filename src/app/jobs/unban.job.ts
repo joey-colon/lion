@@ -1,5 +1,5 @@
-import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
+import { ClientService } from '../../services/client.service';
 
 export class UnBanJob extends Job {
   public interval: number = 1000 * 60 * 60 * 24; // runs each day..
@@ -9,7 +9,7 @@ export class UnBanJob extends Job {
     super();
   }
 
-  public execute(container: IContainer) {
-    container.modService.checkForScheduledUnBans();
+  public execute(container: ClientService) {
+    container.moderation.checkForScheduledUnBans();
   }
 }

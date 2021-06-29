@@ -2,8 +2,9 @@ import { MessageEmbed } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
-import { IPlugin, ICommandLookup, IPluginLookup, IContainer } from '../common/types';
+import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
+import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 
 export interface IPluginState {
@@ -20,9 +21,9 @@ export class PluginService {
 
   private readonly _NUM_DISPLAY = 10;
 
-  public async initPluginState(container: IContainer): Promise<void> {
+  public async initPluginState(client: ClientService): Promise<void> {
 
-    const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(container.clientService).id });
+    const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(client).id });
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {
@@ -103,7 +104,7 @@ export class PluginService {
     });
   }
 
-  public async setPluginState(container: IContainer, plugin: string, active: boolean): Promise<void> {
+  public async setPluginState(plugin: string, active: boolean): Promise<void> {
     const fetchedPlugin = this.plugins[this.aliases[plugin]];
 
     if (!fetchedPlugin) {

@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { Poll } from '../../services/poll.service';
 
 export default class PollPlugin extends Plugin {
@@ -11,14 +11,10 @@ export default class PollPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Public;
   public commandPattern: RegExp = /\d+ .+(\n.+){1,9}/;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const [temp, ...answers] = args.join(' ').split('\n');
     const [time, ...question] = temp.split(' ');
-    const NUM_TO_EMOJI = this.container.pollService.NUM_TO_EMOJI;
+    const NUM_TO_EMOJI = this.client.polls.NUM_TO_EMOJI;
 
     if (answers.length > NUM_TO_EMOJI.length) {
       await message.reply(`Sorry, I only support up to **${NUM_TO_EMOJI.length}** answers.`);
@@ -35,7 +31,7 @@ export default class PollPlugin extends Plugin {
       return;
     }
 
-    const embed = this.container.pollService.createStartEmbed(
+    const embed = this.client.polls.createStartEmbed(
       parseInt(time),
       question.join(' '),
       answers
@@ -48,7 +44,7 @@ export default class PollPlugin extends Plugin {
 
       // Append poll to pollService
       const poll = new Poll(parseInt(time), sentMsg, question.join(' '), answers);
-      this.container.pollService.addPoll(poll);
+      this.client.polls.addPoll(poll);
     });
   }
 }

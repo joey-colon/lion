@@ -1,14 +1,15 @@
 import { GuildMember, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IServerInfo } from '../../common/types';
+import { IHandler, IServerInfo } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
 
 export class MemberCountHandler implements IHandler {
   private _MILESTONE_INTERVAL: number = 100;
 
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
   public async execute(member: GuildMember) {
     const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
 

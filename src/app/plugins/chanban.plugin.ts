@@ -1,7 +1,8 @@
 import { GuildChannel } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 import { GuildService } from '../../services/guild.service';
 
 export default class ChanBanPlugin extends Plugin {
@@ -15,10 +16,6 @@ export default class ChanBanPlugin extends Plugin {
   public commandPattern: RegExp = /([^#]+#\d{4})\s*((?:<#(?:\d+)>\s*)+)/;
 
   private _channelIDRegex: RegExp = /<#(\d+)>/g;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args?: string[]) {
     // never happens, but make linter happy
@@ -35,7 +32,7 @@ export default class ChanBanPlugin extends Plugin {
 
     const [, username, channels] = match;
 
-    const guild = GuildService.getGuild(this.container.clientService);
+    const guild = GuildService.getGuild(this.client);
     const channel_objs =
       channels
         .match(this._channelIDRegex)
@@ -43,7 +40,7 @@ export default class ChanBanPlugin extends Plugin {
         .filter((c) => c !== undefined) ?? [];
 
     try {
-      const successfully_banned_channels = await this.container.modService.channelBan(
+      const successfully_banned_channels = await this.client.moderation.channelBan(
         guild,
         username,
         channel_objs as GuildChannel[]
@@ -56,7 +53,7 @@ export default class ChanBanPlugin extends Plugin {
         await message.reply('Could not ban user in any channels');
       }
     } catch (ex) {
-      this.container.loggerService.error(`When trying to ban ${username} from channels.`, ex);
+      winston.error(`When trying to ban ${username} from channels.`, ex);
     }
   }
 }

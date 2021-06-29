@@ -2,8 +2,9 @@ import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } f
 import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { GameResult, GameType } from '../../services/gameleaderboard.service';
+import { IMessage, ChannelType, Maybe } from '../../common/types';
+import { ClientService } from '../../services/client.service';
+import { GameLeaderboardService, GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class TicTacToe extends Plugin {
   public commandName: string = 'tictactoe';
@@ -15,9 +16,11 @@ export default class TicTacToe extends Plugin {
   public pluginChannelName: string = Constants.Channels.Public.Games;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
+  private _leaderboard: GameLeaderboardService;
 
-  constructor(public container: IContainer) {
-    super();
+  constructor(public client: ClientService) {
+    super(client);
+    this._leaderboard = new GameLeaderboardService(client);
   }
 
   public async execute(message: IMessage) {
@@ -45,7 +48,7 @@ export default class TicTacToe extends Plugin {
     const game = new TTTGame(
       message.author,
       oppMember.user,
-      oppMember.id === this.container.clientService.user?.id
+      oppMember.id === this.client.user?.id
     );
     const msg = await message.reply(game.showBoard());
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
@@ -109,7 +112,7 @@ export default class TicTacToe extends Plugin {
 
       // update the leaderboard for the author of the game
       const updates = [
-        this.container.gameLeaderboardService.updateLeaderboard(
+        this._leaderboard.updateLeaderboard(
           message.author,
           GameType.TicTacToe,
           {
@@ -117,7 +120,7 @@ export default class TicTacToe extends Plugin {
             result: convertToResult(message.author),
           }
         ),
-        this.container.gameLeaderboardService.updateLeaderboard(
+        this._leaderboard.updateLeaderboard(
           oppMember.user,
           GameType.TicTacToe,
           {

@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { MessageService } from '../../services/message.service';
 
 export default class ListClassesPlugin extends Plugin {
@@ -10,20 +10,16 @@ export default class ListClassesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args?: string[]) {
     let filter = args && args.length > 0 ? args[0].toUpperCase() : ClassType.ALL;
     let badFilterParam = false;
 
     if (filter !== ClassType.ALL) {
-      filter = this.container.classService.resolveClassType(filter);
+      filter = this.client.classes.resolveClassType(filter);
       badFilterParam = !filter;
     }
 
-    const response = this.container.classService.buildClassListText(filter);
+    const response = this.client.classes.buildClassListText(filter);
 
     response.push('\n You can register for classes through the `!register` command.');
 

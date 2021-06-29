@@ -1,11 +1,12 @@
 import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
-import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { IHandler, IMessage, ClassType } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { GuildService } from '../../services/guild.service';
 
 export class ReactHandler implements IHandler {
   private _PIN_THRESH = 5;
 
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     const message = reaction.message;
@@ -32,15 +33,15 @@ export class ReactHandler implements IHandler {
     }
 
     // Make sure its the acknowlege reaction, incase they were to send other reactions
-    if (reaction.emoji.name !== this.container.warningService.ACKNOWLEDGE_EMOJI) {
+    if (reaction.emoji.name !== this.client.warnings.ACKNOWLEDGE_EMOJI) {
       return;
     }
 
-    await this.container.warningService.deleteChan(user.id);
+    await this.client.warnings.deleteChan(user.id);
   }
 
   private _handleClassChannelPinRequest(message: IMessage, channel: TextChannel) {
-    if (!this.container.classService.getClasses(ClassType.ALL).has(channel.name)) {
+    if (!this.client.classes.getClasses(ClassType.ALL).has(channel.name)) {
       return;
     }
 

@@ -1,8 +1,9 @@
 import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
-import { GameType } from '../../services/gameleaderboard.service';
+import { ChannelType, IMessage, Maybe } from '../../common/types';
+import { ClientService } from '../../services/client.service';
+import { gameAliases, GameLeaderboardService, GameType } from '../../services/gameleaderboard.service';
 
 export default class LeaderboardPlugin extends Plugin {
   public commandName: string = 'leaderboard';
@@ -17,8 +18,11 @@ export default class LeaderboardPlugin extends Plugin {
     return args.length >= 1;
   }
 
-  constructor(public container: IContainer) {
-    super();
+  private _leaderboard: GameLeaderboardService;
+
+  constructor(client: ClientService) {
+    super(client);
+    this._leaderboard = new GameLeaderboardService(client);
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -38,7 +42,7 @@ export default class LeaderboardPlugin extends Plugin {
 
     // Get default leaderboard if no users are given
     if (!opponentOne) {
-      const embed = await this.container.gameLeaderboardService.createOverallLeaderboardEmbed(
+      const embed = await this._leaderboard.createOverallLeaderboardEmbed(
         message.author,
         gameEnum
       );
@@ -64,7 +68,7 @@ export default class LeaderboardPlugin extends Plugin {
     gameEnum: GameType
   ) {
 
-    return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
+    return this._leaderboard.createMatchupLeaderboardEmbed(
       message.author,
       opponent,
       gameEnum
@@ -77,7 +81,7 @@ export default class LeaderboardPlugin extends Plugin {
     gameEnum: GameType
   ) {
 
-    return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
+    return this._leaderboard.createMatchupLeaderboardEmbed(
       playerOne,
       playerTwo,
       gameEnum
@@ -85,7 +89,6 @@ export default class LeaderboardPlugin extends Plugin {
   }
 
   private _getGameType(gameName: string): Maybe<GameType> {
-    const gameAliases = this.container.gameLeaderboardService.gameAliases;
     if (gameAliases[GameType.TicTacToe].includes(gameName)) {
       return GameType.TicTacToe;
     }

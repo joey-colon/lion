@@ -1,7 +1,9 @@
 import { Guild } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { GuildService } from '../../services/guild.service';
 import { Moderation } from '../../services/moderation.service';
 
@@ -17,9 +19,9 @@ export default class ModReportPlugin extends Plugin {
   
   private _guild: Guild;
 
-  constructor(public container: IContainer) {
-    super();
-    this._guild = GuildService.getGuild(container.clientService);
+  constructor(client: ClientService) {
+    super(client);
+    this._guild = GuildService.getGuild(client);
   }
 
   public async execute(message: IMessage, args: string[]) {
@@ -46,7 +48,7 @@ export default class ModReportPlugin extends Plugin {
       }
     } catch (e) {
       await message.reply('Something went wrong. Did you put the username correctly?');
-      this.container.loggerService.error(e);
+      winston.error(e);
     }
   }
 
@@ -73,12 +75,12 @@ export default class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileReport(rep));
+    message.reply(await this.client.moderation.fileReport(rep));
   }
 
   private async _handleListReport(message: IMessage, user_handle: string) {
     message.reply(
-      await this.container.modService.getModerationSummary(
+      await this.client.moderation.getModerationSummary(
         this._guild,
         user_handle
       )
@@ -89,7 +91,7 @@ export default class ModReportPlugin extends Plugin {
     try {
       await message.reply(`Full Report for ${user_handle}`, {
         files: [
-          await this.container.modService.getFullReport(
+          await this.client.moderation.getFullReport(
             this._guild,
             user_handle
           ),
@@ -106,7 +108,7 @@ export default class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileWarning(rep));
+    message.reply(await this.client.moderation.fileWarning(rep));
   }
 
   private async _handleIssueBan(message: IMessage, user_handle: string, description?: string) {
@@ -115,6 +117,6 @@ export default class ModReportPlugin extends Plugin {
       await message.reply('Error creating report');
       return;
     }
-    message.reply(await this.container.modService.fileBan(rep));
+    message.reply(await this.client.moderation.fileBan(rep));
   }
 }

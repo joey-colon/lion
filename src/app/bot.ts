@@ -1,4 +1,3 @@
-import { IContainer } from '../common/types';
 import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
 import { Listener } from './listener';
@@ -6,22 +5,25 @@ import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
+import { ClientService } from '../services/client.service';
+import winston from 'winston';
+import { StoreService } from '../services/store.service';
 
 export class Bot {
   private _kernel!: Kernel;
   private _listener!: Listener;
   private _webServer!: Express;
-  public container!: IContainer;
+  public client: ClientService;
   private _webServerInstance: Server.Server | undefined;
 
-  constructor() {
+  constructor(client: ClientService) {
+    this.client = client;
     this._initialise();
   }
 
   private _initialise(): void {
     this._kernel = new Kernel();
-    this.container = this._kernel.getContainer();
-    this._listener = new Listener(this.container);
+    this._listener = new Listener(this.client);
     this._webServer = express();
   }
 
@@ -33,7 +35,7 @@ export class Bot {
   }
 
   private _registerPlugins(): void {
-    this.container.pluginService.reset();
+    this.client.pluginService.reset();
 
     const pluginFolder = './src/app/plugins';
     fs.readdir(pluginFolder, (_err, files) => {
@@ -45,37 +47,37 @@ export class Bot {
         // Try to see if it's in the proper form.
         try {
           // Check constructor.
-          const plugin = new pluginInstance.default(this.container);
+          const plugin = new pluginInstance.default(this.client);
 
           // Check instance.
           if (!(plugin instanceof Plugin)) {
-            this.container.loggerService.error(`${file} has a default export, but it is not of type Plugin`);
+            winston.error(`${file} has a default export, but it is not of type Plugin`);
             return;
           }
 
           // Register plugin.
-          this.container.pluginService.register(plugin);
+          this.client.pluginService.register(plugin);
         } catch(err) {
-          this.container.loggerService.warn(`${file} doesn't have a default export of type Plugin!`);
+          winston.warn(`${file} doesn't have a default export of type Plugin!`);
         }
       });
     });
   }
 
   private _registerJobs() {
-    this.container.jobService.reset();
+    this.client.jobService.reset();
 
-    const jobs = this.container.jobService.jobs;
+    const jobs = this.client.jobService.jobs;
     for (const job of jobs) {
-      this.container.jobService.register(job, this.container);
+      this.client.jobService.register(job, this.client);
     }
   }
 
   private _registerStores() {
-    this.container.storeService.reset();
+    StoreService.reset();
 
-    this.container.storeService.stores.forEach((store: Store) => {
-      this.container.storeService.register(store);
+    StoreService.STORES.forEach((store: Store) => {
+      StoreService.register(store);
     });
   }
 
@@ -85,7 +87,7 @@ export class Bot {
 
     const defaultPort = 3000;
     this._webServerInstance = this._webServer.listen(process.env.WEBSERVER_PORT ?? defaultPort, () =>
-      this.container.loggerService.info('Webserver is now running')
+      winston.info('Webserver is now running')
     );
 
     this._webServer.get('/health', (_, res) => res.send('OK'));
@@ -94,7 +96,7 @@ export class Bot {
   private _resetWebServer() {
     this._webServerInstance?.close((err) => {
       if (err) {
-        this.container.loggerService.error('While closing webServerInstance: ' + err);
+        winston.error('While closing webServerInstance: ' + err);
       }
     });
   }
@@ -102,10 +104,10 @@ export class Bot {
   public async run() {
     while (true) {
       try {
-        this.container.loggerService.info('Loading and running Bot...');
+        winston.info('Loading and running Bot...');
         this._loadAndRun();
 
-        this.container.loggerService.info('Bot loaded. Sleeping thread until error.');
+        winston.info('Bot loaded. Sleeping thread until error.');
         // sleep infinitely, waiting for error
         while (true) {
           const waiting = new Promise((resolve) => setTimeout(resolve, 1_000_000_000));
@@ -114,7 +116,7 @@ export class Bot {
       } catch (e) {
         console.log('here');
         console.log(e);
-        this.container.loggerService.error('Bot crashed with error: ' + e);
+        winston.error('Bot crashed with error: ' + e);
 
         // re-init everything before restarting loop
         this._initialise();

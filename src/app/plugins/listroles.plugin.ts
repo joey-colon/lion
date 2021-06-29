@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
 import { GuildService } from '../../services/guild.service';
 import { MessageService } from '../../services/message.service';
@@ -13,10 +13,6 @@ export default class ListRolesPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
 
   private _BLACKLIST = ['@everyone', 'un verified', 'nitro booster'];
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage) {
     let res = '```\n';
@@ -32,8 +28,8 @@ export default class ListRolesPlugin extends Plugin {
       mp.set(role[1].name.toLowerCase(), true);
     }
 
-    const chatbotRole = GuildService.getRole(this.container.clientService, 'Chatbot')!;
-    GuildService.getGuild(this.container.clientService)
+    const chatbotRole = GuildService.getRole(this.client, 'Chatbot')!;
+    GuildService.getGuild(this.client)
       .roles.cache.sort((a: Role, b: Role) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       )

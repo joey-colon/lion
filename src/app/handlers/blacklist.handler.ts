@@ -1,6 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
+import { IHandler, IMessage, ClassType } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { MessageService } from '../../services/message.service';
 import { Moderation } from '../../services/moderation.service';
 import { UserService } from '../../services/user.service';
@@ -20,7 +21,7 @@ export class BlacklistHandler implements IHandler {
   ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public execute(message: IMessage): void {
     const channel = message.channel as TextChannel;
@@ -51,13 +52,13 @@ export class BlacklistHandler implements IHandler {
           message.author.tag,
           `Shared a ${label} link.`
         );
-        this.container.modService.fileReport(rep);
+        this.client.moderation.fileReport(rep);
         message.delete();
         return;
       }
     });
 
-    const isClassChannel = this.container.classService.getClasses(ClassType.ALL).has(channel.name);
+    const isClassChannel = this.client.classes.getClasses(ClassType.ALL).has(channel.name);
     const hasBackticks = message.content.toLowerCase().match(/```/);
     const hasAttachment = message.attachments.size;
 

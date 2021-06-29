@@ -1,7 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable, Guild } from 'discord.js';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 export default class AddRolesPlugin extends Plugin {
   public commandName: string = 'addroles';
@@ -18,9 +20,9 @@ export default class AddRolesPlugin extends Plugin {
   };
   private _guild: Guild;
 
-  constructor(public container: IContainer) {
-    super();
-    this._guild = GuildService.getGuild(container.clientService);
+  constructor(client: ClientService) {
+    super(client);
+    this._guild = GuildService.getGuild(client);
   }
 
   public validate(message: IMessage, args: string[]) {
@@ -68,7 +70,7 @@ export default class AddRolesPlugin extends Plugin {
         roles_added.push(role.name);
         await this._react(role.name.toLowerCase(), message);
       } catch (err) {
-        this.container.loggerService.error(
+        winston.error(
           `User ${member.user.tag} attempted to add the role ${elem} but failed: ${err}`
         );
       }

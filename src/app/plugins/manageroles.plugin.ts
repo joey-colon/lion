@@ -1,10 +1,11 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 import axios from 'axios';
 import { GuildService } from '../../services/guild.service';
+import winston from 'winston';
 
 interface IRoleInfo {
   id: Snowflake;
@@ -30,10 +31,6 @@ export default class ManageRolesPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public validate(_message: IMessage, args: string[]) {
     return args.length > 0;
   }
@@ -52,8 +49,8 @@ export default class ManageRolesPlugin extends Plugin {
   }
 
   private async _dumpRolesInfo(message: IMessage) {
-    const highestRole = GuildService.getGuild(message.client).roles.highest;
-    const rolesInfo = GuildService.getGuild(this.container.clientService)
+    const highestRole = GuildService.getGuild(this.client).roles.highest;
+    const rolesInfo = GuildService.getGuild(this.client)
       .roles.cache.reduce((acc: IRoleInfo[], curRole) => {
         // only include roles that the bot can actually update.
         if (curRole.comparePositionTo(highestRole) < 0 && curRole.name !== '@everyone') {
@@ -80,7 +77,7 @@ export default class ManageRolesPlugin extends Plugin {
       roleInfos = got;
     } catch (ex) {
       await message.reply("Error while parsing supplied role info. Are you sure it's well-formed?");
-      this.container.loggerService.warn('Got this error while trying to read ' + attachments.url);
+      winston.warn('Got this error while trying to read ' + attachments.url);
       return;
     }
 
@@ -91,7 +88,7 @@ export default class ManageRolesPlugin extends Plugin {
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {
     try {
-      const role = GuildService.getGuild(this.container.clientService).roles.cache.get(roleInfo.id);
+      const role = GuildService.getGuild(this.client).roles.cache.get(roleInfo.id);
 
       if (!role) {
         return;
@@ -121,7 +118,7 @@ export default class ManageRolesPlugin extends Plugin {
 
       return { oldInfo, newInfo, changedName, changedColor, removedRole, id: role.id };
     } catch (ex) {
-      this.container.loggerService.error(ex);
+      winston.error(ex);
     }
   }
 
@@ -131,7 +128,7 @@ export default class ManageRolesPlugin extends Plugin {
     const discrim = '' + Math.random();
     const filename = `/tmp/roles_info${discrim}.json`;
     await fs.promises.writeFile(filename, JSON.stringify(data)).catch((err) => {
-      this.container.loggerService.error('While writing to ' + filename, err);
+      winston.error('While writing to ' + filename, err);
     });
     return filename;
   }

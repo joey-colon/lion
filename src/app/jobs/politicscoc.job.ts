@@ -1,8 +1,9 @@
-import { IContainer } from '../../common/types';
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 export class PoliticsCoCReminder extends Job {
   public interval: number = 1000 * 60 * 30; // every 30 minutes
@@ -12,13 +13,13 @@ export class PoliticsCoCReminder extends Job {
     super();
   }
 
-  public execute(container: IContainer) {
+  public execute(client: ClientService) {
     try {
-      container.loggerService.debug(`Starting ${this.name} job`);
+      winston.debug(`Starting ${this.name} job`);
 
-      const guild = GuildService.getGuild(container.clientService);
+      const guild = GuildService.getGuild(client);
       if (!guild) {
-        container.loggerService.warn('No guild yet');
+        winston.warn('No guild yet');
         return;
       }
 
@@ -28,15 +29,15 @@ export class PoliticsCoCReminder extends Job {
         .channels.cache.find((c) => c.name === Constants.Channels.Public.Politics);
 
       if (!politicsChan) {
-        container.loggerService.silly("no politics channel detected (it's for the best)");
+        winston.silly("no politics channel detected (it's for the best)");
         return;
       }
 
-      const codeOfConduct = GuildService.getGuild(container.clientService)
+      const codeOfConduct = GuildService.getGuild(client)
         .channels.cache.find((c) => c.name === Constants.Channels.Info.CodeOfConduct);
 
       if (!codeOfConduct) {
-        container.loggerService.silly('no code of conduct channel detected');
+        winston.silly('no code of conduct channel detected');
         return;
       }
 
@@ -44,7 +45,7 @@ export class PoliticsCoCReminder extends Job {
         `Please remember to follow the <#${codeOfConduct.id}>, especially in this channel!`
       );
     } catch (ex) {
-      container.loggerService.error(ex);
+      winston.error(ex);
       console.log(ex);
     }
   }

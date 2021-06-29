@@ -1,6 +1,6 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
 import { MessageService } from '../../services/message.service';
 import { GuildService } from '../../services/guild.service';
@@ -21,10 +21,6 @@ export default class MarketPlacePlugin extends Plugin {
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public async execute(message: IMessage, args: string[]) {
     const [sub_command] = args;
@@ -183,10 +179,10 @@ export default class MarketPlacePlugin extends Plugin {
       return this._LINK_PREFIX;
     }
 
-    const guild = GuildService.getGuild(this.container.clientService);
+    const guild = GuildService.getGuild(this.client);
 
     const guildID = guild.id;
-    const chanID = GuildService.getChannel(this.container.clientService, Constants.Channels.Public.BuySellTrade)!.id;
+    const chanID = GuildService.getChannel(this.client, Constants.Channels.Public.BuySellTrade)!.id;
     this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     return this._LINK_PREFIX;
   }

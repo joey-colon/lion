@@ -104,10 +104,13 @@ export namespace Moderation {
 }
 
 export class ModService {
+  private _warningService: WarningService;
+
   constructor(
-    private _clientService: ClientService,
-    private _warningService: WarningService
-  ) {}
+    private _clientService: ClientService
+  ) {
+    this._warningService = new WarningService(_clientService);
+  }
 
   // Files a report but does not warn the subject.
   public async fileReport(report: Moderation.Report): Promise<string> {

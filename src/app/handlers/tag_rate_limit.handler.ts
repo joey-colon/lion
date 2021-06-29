@@ -1,7 +1,9 @@
-import { IHandler, IMessage, IContainer } from '../../common/types';
+import { IHandler, IMessage } from '../../common/types';
 import { Guild } from 'discord.js';
 import { MessageService } from '../../services/message.service';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 export class TagRateLimitHandler implements IHandler {
   private _MAX_ROLES_TAGGED = 6;
@@ -9,7 +11,7 @@ export class TagRateLimitHandler implements IHandler {
 
   private _TAGS_MAP = new Map<Guild, Map<string, number[]>>();
 
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public execute(message: IMessage) {
     // guard against message.member being null
@@ -34,7 +36,7 @@ export class TagRateLimitHandler implements IHandler {
       const time_since = dates[0] - dates[dates.length - 1];
       if (time_since <= this._TAG_RATE_DURATION) {
         MessageService.sendBotReportOnMessage(message);
-        this.container.loggerService.info('Sent bot report.');
+        winston.info('Sent bot report.');
       }
       dates.splice(0, dates.length);
     }

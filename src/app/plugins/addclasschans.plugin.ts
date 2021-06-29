@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { GuildService } from '../../services/guild.service';
@@ -35,10 +35,6 @@ export default class AddClassChannelsPlugin extends Plugin {
     'and feel free to reach out to any Moderator with questions or concerns for the server.\n\n' +
     'Have a great semester!';
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public validate(message: IMessage, args: string[]) {
     return args && args.length > 0;
   }
@@ -73,7 +69,7 @@ export default class AddClassChannelsPlugin extends Plugin {
 
     const getCat = async (category: string) => {
       category = category.toLowerCase();
-      const ret = GuildService.getGuild(this.container.clientService)
+      const ret = GuildService.getGuild(this.client)
         .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
       if (!ret) {
         
@@ -123,7 +119,7 @@ export default class AddClassChannelsPlugin extends Plugin {
             await (newChan as TextChannel).send(this._createFirstMessage(newChan.name));
           });
       } catch (ex) {
-        this.container.loggerService.error(ex);
+        winston.error(ex);
       }
     }
 
@@ -162,7 +158,7 @@ export default class AddClassChannelsPlugin extends Plugin {
         };
         parsedClasses.push(newClass);
       } else {
-        this.container.loggerService.error(`Err: ${v}`);
+        winston.error(`Err: ${v}`);
       }
     }
 

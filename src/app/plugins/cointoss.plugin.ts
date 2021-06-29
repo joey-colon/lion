@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 export default class CoinToss extends Plugin {
@@ -14,10 +14,6 @@ export default class CoinToss extends Plugin {
   private _coinImg: string = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/coin_1fa99.png';
   private _wandImg: string = 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/285/magic-wand_1fa84.png';
   private _defaultArgs: string[] = ['Heads', 'Tails'];
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public execute(message: IMessage, args: string[]) {
     const responses: string[] = [];

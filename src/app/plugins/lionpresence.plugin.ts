@@ -1,6 +1,6 @@
 import { ActivityType } from 'discord.js';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 
 export default class LionPresence extends Plugin {
   public commandName: string = 'lionpresence';
@@ -10,10 +10,6 @@ export default class LionPresence extends Plugin {
   public pluginAlias = ['setactivity', 'setact'];
   public permission: ChannelType = ChannelType.Staff;
   private _types: string[] = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public validate(message: IMessage, args: string[]) {
     return args && args.length > 1;
@@ -27,7 +23,7 @@ export default class LionPresence extends Plugin {
       return;
     }
 
-    await this.container.clientService.user?.setPresence({
+    await this.client.user?.setPresence({
       activity: { name: activity.join(' '), type: type.toUpperCase() as ActivityType },
       status: 'online',
     });

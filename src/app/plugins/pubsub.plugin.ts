@@ -1,9 +1,11 @@
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
+import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 import axios from 'axios';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 export default class PubSubPlugin extends Plugin {
   public commandName: string = 'pubsub';
@@ -23,8 +25,8 @@ export default class PubSubPlugin extends Plugin {
   private _SUB_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
   private _LAST_UPD_TIME: number = 0;
 
-  constructor(public container: IContainer) {
-    super();
+  constructor(client: ClientService) {
+    super(client);
     this._updateData();
   }
 
@@ -36,7 +38,7 @@ export default class PubSubPlugin extends Plugin {
 
         this._SUBS = subs.map((subData: { name: string }) => subData.name);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   public async execute(message: IMessage, args?: string[]) {
@@ -65,7 +67,7 @@ export default class PubSubPlugin extends Plugin {
 
         message.reply(embed);
       })
-      .catch((err) => this.container.loggerService.warn(err));
+      .catch(winston.warn);
   }
 
   private _generateEmbedList(): MessageEmbed {

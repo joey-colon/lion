@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
+import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 
 export default class StatusPlugin extends Plugin {
@@ -14,10 +14,6 @@ export default class StatusPlugin extends Plugin {
   'https://cdn.discordapp.com/avatars/574623716638720000/7d404c72a6fccb4a3bc610490f8d7b72.png';
   private _REPO_URL = 'https://github.com/joey-colon/lion/commit/';
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     if (!latestCommit) {
@@ -25,7 +21,7 @@ export default class StatusPlugin extends Plugin {
       return;
     }
 
-    const numPlugins = Object.values(this.container.pluginService.plugins).length;
+    const numPlugins = Object.values(this.client.pluginService.plugins).length;
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPlugins, uptime);
@@ -51,7 +47,7 @@ export default class StatusPlugin extends Plugin {
   }
 
   private _getUptime() {
-    const startDate: Date = this.container.clientService.getStartDate();
+    const startDate: Date = this.client.getStartDate();
     const currentDate: Date = new Date();
 
     const days = currentDate.getDay() - startDate.getDay();

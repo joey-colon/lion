@@ -1,8 +1,9 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType } from '../../common/types';
+import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed, TextChannel } from 'discord.js';
 import { MessageService } from '../../services/message.service';
+import { ChannelService } from '../../services/channel.service';
 
 export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
@@ -12,12 +13,8 @@ export default class HelpPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.All;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args?: string[]) {
-    const commands = this.container.pluginService.aliases;
+    const commands = this.client.pluginService.aliases;
     const input: string = this._parseCommand(args ?? []);
 
     if (commands[input]) {
@@ -35,12 +32,12 @@ export default class HelpPlugin extends Plugin {
   }
 
   private _getEmbed(message: IMessage, type: string) {
-    const currentChanPerm = this.container.channelService.getChannelType(
+    const currentChanPerm = ChannelService.getChannelType(
       (message.channel as TextChannel).name
     );
 
-    const plugins = Object.keys(this.container.pluginService.plugins).filter((p: string) => {
-      const plugin = this.container.pluginService.get(p);
+    const plugins = Object.keys(this.client.pluginService.plugins).filter((p: string) => {
+      const plugin = this.client.pluginService.get(p);
 
       if (plugin.pluginChannelName) {
         return plugin.pluginChannelName === (message.channel as TextChannel).name;
@@ -50,11 +47,11 @@ export default class HelpPlugin extends Plugin {
       return plugin.permission === currentChanPerm;
     });
 
-    return this.container.pluginService.generateHelpEmbeds(plugins, type);
+    return this.client.pluginService.generateHelpEmbeds(plugins, type);
   }
 
   private _generatePluginEmbed(targ: string) {
-    const plugin = this.container.pluginService.plugins[targ];
+    const plugin = this.client.pluginService.plugins[targ];
     const aliases = plugin.pluginAlias ?? [];
 
     // Single Plugins are not paged

@@ -1,7 +1,8 @@
 import { TextChannel } from 'discord.js';
+import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage } from '../../common/types';
+import { ChannelType, IMessage } from '../../common/types';
 import { GuildService } from '../../services/guild.service';
 
 export default class SlowModePlugin extends Plugin {
@@ -13,10 +14,6 @@ export default class SlowModePlugin extends Plugin {
   public permission: ChannelType = ChannelType.Staff;
   public pluginChannelName: string = Constants.Channels.Staff.ModChat;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public validate(_message: IMessage, args?: string[]) {
     return !!args && args.length >= 3;
   }
@@ -24,7 +21,7 @@ export default class SlowModePlugin extends Plugin {
   public execute(message: IMessage, args: string[]) {
     const createUndoFunc = (channel: TextChannel) => {
       const f = async () => {
-        this.container.loggerService.info(`turning off slowmode in ${channel.name}`);
+        winston.info(`turning off slowmode in ${channel.name}`);
         await channel.setRateLimitPerUser(0);
       };
       return f;
@@ -39,14 +36,14 @@ export default class SlowModePlugin extends Plugin {
     channels
       .reduce((acc: TextChannel[], cur: string) => {
         const id = cur.replace(/\D/g, '');
-        const channel = GuildService.getGuild(this.container.clientService).channels.cache.get(id) as TextChannel;
+        const channel = GuildService.getGuild(this.client).channels.cache.get(id) as TextChannel;
 
         channel && acc.push(channel);
 
         return acc;
       }, [])
       .forEach(async (channel: TextChannel) => {
-        this.container.loggerService.info(`turning on slowmode in ${channel.name}`);
+        winston.info(`turning on slowmode in ${channel.name}`);
 
         await channel.send(`**ANNOUNCEMENT**\nSlowmode is on until ${expDate.toISOString()}`);
 

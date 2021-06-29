@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, ClassType } from '../../common/types';
+import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { MessageService } from '../../services/message.service';
 
 export default class FetchClassChannelsPlugin extends Plugin {
@@ -10,13 +10,9 @@ export default class FetchClassChannelsPlugin extends Plugin {
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Admin;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage) {
     const response = ['Current classes:\n'];
-    response.push(...this.container.classService.buildClassListText(ClassType.ALL));
+    response.push(...this.client.classes.buildClassListText(ClassType.ALL));
     for (const r of response) {
       await MessageService.attemptDMUser(message, r);
     }

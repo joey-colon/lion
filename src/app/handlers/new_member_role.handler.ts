@@ -1,15 +1,16 @@
 import { GuildMember, TextChannel } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { AGE_THRESHOLD, UserService } from '../../services/user.service';
 import { MessageService } from '../../services/message.service';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
 
 export class NewMemberRoleHandler implements IHandler {
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const unverifiedRole = GuildService.getRole(this.container.clientService, Constants.Roles.Unverifed)!;
+    const unverifiedRole = GuildService.getRole(this.client, Constants.Roles.Unverifed)!;
     const shouldUnverify = UserService.shouldUnverify(member);
     if (!shouldUnverify) {
       return;

@@ -1,6 +1,7 @@
 import { User } from 'discord.js';
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import { IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 import { GuildService } from '../../services/guild.service';
 import { MessageService } from '../../services/message.service';
 import { UserService } from '../../services/user.service';
@@ -15,10 +16,6 @@ export default class RegisterPlugin extends Plugin {
 
   private _MAX_ALLOWED_CLASSES = 10;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public validate(message: IMessage, args: string[]) {
     return !!args.filter((arg) => !!arg).length;
   }
@@ -29,8 +26,8 @@ export default class RegisterPlugin extends Plugin {
     }
 
     const registeredClasses = Array.from(
-      this.container.classService.getClasses(ClassType.ALL).values()
-    ).filter((chan) => this.container.classService.userIsRegistered(chan, message.author));
+      this.client.classes.getClasses(ClassType.ALL).values()
+    ).filter((chan) => this.client.classes.userIsRegistered(chan, message.author));
 
     if (!message.member) {
       return;
@@ -58,22 +55,22 @@ export default class RegisterPlugin extends Plugin {
       }
     }
 
-    const request = this.container.classService.buildRequest(user, [className]);
+    const request = this.client.classes.buildRequest(user, [className]);
     if (!request) {
-      this.container.loggerService.warn(
+      winston.warn(
         `Error building request: ${JSON.stringify({ user: user.id, className: className })}`
       );
       return 'Error building request';
     }
     try {
-      const response = await this.container.classService.register(request);
+      const response = await this.client.classes.register(request);
       if (response.includes('success')) {
         return 'success';
       } else {
         return 'invalid';
       }
     } catch (e) {
-      this.container.loggerService.error(e);
+      winston.error(e);
     }
 
     return 'success';
@@ -107,12 +104,12 @@ export default class RegisterPlugin extends Plugin {
       return;
     }
 
-    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+    if (this.client.classes.getClasses(ClassType.ALL).size === 0) {
       await message.reply('No classes found at this time.');
       return;
     }
 
-    const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
+    const embedMessages: IEmbedData[] = this.client.classes.getSimilarClasses(
       message,
       invalidClasses
     );
@@ -123,7 +120,7 @@ export default class RegisterPlugin extends Plugin {
         return MessageService.sendReactiveMessage(
           message,
           embedData,
-          this.container.classService.addClass,
+          this.client.classes.addClass,
           {
             reactionCutoff: 1,
             cutoffMessage: `Successfully registered to ${embedData.emojiData[0].args.classChan ||

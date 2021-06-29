@@ -1,5 +1,6 @@
+import winston from 'winston';
 import { Plugin } from '../../common/plugin';
-import { IContainer, IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
+import { IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
 import { MessageService } from '../../services/message.service';
 
 export default class UnregisterPlugin extends Plugin {
@@ -9,10 +10,6 @@ export default class UnregisterPlugin extends Plugin {
   public usage: string = 'unregister <class_name>';
   public pluginAlias = [];
   public permission: ChannelType = ChannelType.Bot;
-
-  constructor(public container: IContainer) {
-    super();
-  }
 
   public validate(message: IMessage, args: string[]) {
     return args.filter((arg) => !!arg).length > 0;
@@ -28,21 +25,21 @@ export default class UnregisterPlugin extends Plugin {
     const invalidClasses: string[] = [];
 
     for (const arg of args) {
-      const request = this.container.classService.buildRequest(message.author, [arg]);
+      const request = this.client.classes.buildRequest(message.author, [arg]);
       if (!request) {
         invalidClasses.push(arg);
         continue;
       }
 
       try {
-        const response = await this.container.classService.unregister(request);
+        const response = await this.client.classes.unregister(request);
         if (response.includes('success')) {
           numSuccessfulClasses++;
         } else {
           invalidClasses.push(arg);
         }
       } catch (e) {
-        this.container.loggerService.error(e);
+        winston.error(e);
       }
     }
 
@@ -54,12 +51,12 @@ export default class UnregisterPlugin extends Plugin {
       return;
     }
 
-    if (this.container.classService.getClasses(ClassType.ALL).size === 0) {
+    if (this.client.classes.getClasses(ClassType.ALL).size === 0) {
       await message.reply('No classes found at this time.');
       return;
     }
 
-    const embedMessages: IEmbedData[] = this.container.classService.getSimilarClasses(
+    const embedMessages: IEmbedData[] = this.client.classes.getSimilarClasses(
       message,
       invalidClasses
     );
@@ -70,7 +67,7 @@ export default class UnregisterPlugin extends Plugin {
         return MessageService.sendReactiveMessage(
           message,
           embedData,
-          this.container.classService.removeClass,
+          this.client.classes.removeClass,
           {
             reactionCutoff: 1,
             cutoffMessage: `Successfully unregistered to ${embedData.emojiData[0].args.classChan ||
@@ -84,13 +81,13 @@ export default class UnregisterPlugin extends Plugin {
   }
 
   private async _removeFromAllClasses(message: IMessage) {
-    const request = this.container.classService.buildRequest(message.author, ['all']);
+    const request = this.client.classes.buildRequest(message.author, ['all']);
     if (!request) {
       await message.reply('Unable to complete your request.');
       return;
     }
 
-    const response = await this.container.classService.unregister(request);
+    const response = await this.client.classes.unregister(request);
     message.reply(response);
   }
 }

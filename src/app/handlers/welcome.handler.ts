@@ -1,13 +1,15 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
-import { IContainer, IHandler } from '../../common/types';
+import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { UserService } from '../../services/user.service';
 import { GuildService } from '../../services/guild.service';
+import { ClientService } from '../../services/client.service';
+import winston from 'winston';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
 
-  constructor(public container: IContainer) {}
+  constructor(public client: ClientService) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = UserService.shouldUnverify(member);
@@ -15,7 +17,7 @@ export class WelcomeHandler implements IHandler {
     await member
       .send(embed)
       .catch(() =>
-        this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
+        winston.debug(`Couldn't DM new user ${member.user.tag}`)
       );
   }
 
@@ -24,7 +26,7 @@ export class WelcomeHandler implements IHandler {
     embed.title = 'Welcome!';
     embed.setURL(this._LION_URL);
 
-    const icon = GuildService.getGuild(this.container.clientService).iconURL();
+    const icon = GuildService.getGuild(this.client).iconURL();
     if (icon) {
       embed.setThumbnail(icon);
     }

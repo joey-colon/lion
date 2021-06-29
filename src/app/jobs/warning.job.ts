@@ -1,7 +1,7 @@
 import { CategoryChannel, TextChannel } from 'discord.js';
 import moment from 'moment';
 import { Job } from '../../common/job';
-import { IContainer } from '../../common/types';
+import { ClientService } from '../../services/client.service';
 import { GuildService } from '../../services/guild.service';
 
 export class WarningJob extends Job {
@@ -12,9 +12,9 @@ export class WarningJob extends Job {
     super();
   }
 
-  public execute(container: IContainer) {
+  public execute(client: ClientService) {
     // Cache the messages in the warning channels so we can listen
-    const warnCat = GuildService.getChannel(container.clientService, 'warnings') as CategoryChannel;
+    const warnCat = GuildService.getChannel(client, 'warnings') as CategoryChannel;
     warnCat.children.forEach((chan) => (chan as TextChannel).messages.fetch({ limit: 10 }));
   }
 }

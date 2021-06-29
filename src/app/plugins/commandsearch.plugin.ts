@@ -1,5 +1,5 @@
 import { Plugin } from '../../common/plugin';
-import { ChannelType, IContainer, IMessage, IPlugin } from '../../common/types';
+import { ChannelType, IMessage, IPlugin } from '../../common/types';
 import { MessageService } from '../../services/message.service';
 
 export default class CommandSearchPlugin extends Plugin {
@@ -11,15 +11,11 @@ export default class CommandSearchPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Bot;
   public commandPattern: RegExp = /[^]+/;
 
-  constructor(public container: IContainer) {
-    super();
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const query = args.join(' ');
 
     // For every plugin, evaluate it's match
-    const results = Object.entries(this.container.pluginService.plugins).reduce(
+    const results = Object.entries(this.client.pluginService.plugins).reduce(
       (results: string[], [pluginName, plugin]) => {
         if (
           plugin.permission === ChannelType.Admin ||
@@ -40,7 +36,7 @@ export default class CommandSearchPlugin extends Plugin {
       return;
     }
 
-    const embeds = this.container.pluginService.generateHelpEmbeds(results, 'adv');
+    const embeds = this.client.pluginService.generateHelpEmbeds(results, 'adv');
     embeds.forEach((embed) =>
       embed.setTitle('**__I found the following commands matching your search__**')
     );
