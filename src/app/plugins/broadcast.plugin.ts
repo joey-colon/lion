@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
 import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 
 export default class BroadcastPlugin extends Plugin {
   public commandName: string = 'broadcast';
@@ -110,7 +110,7 @@ export default class BroadcastPlugin extends Plugin {
       }
 
       // Otherwise, its a class name
-      const targetChannel = GuildService.getChannel(message.client, name.toLowerCase());
+      const targetChannel = GuildManager.getChannel(message.client, name.toLowerCase());
       if (targetChannel) {
         this._CHANS_TO_SEND.push(targetChannel);
       }

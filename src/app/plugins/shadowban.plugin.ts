@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { CategoryChannel, Collection, Guild, GuildChannel, User } from 'discord.js';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 
 export default class ShadowBanPlugin extends Plugin {
@@ -27,7 +27,7 @@ export default class ShadowBanPlugin extends Plugin {
 
   constructor(public client: LionClient) {
     super(client);
-    this._guild = GuildService.getGuild(client);
+    this._guild = GuildManager.getGuild(client);
   }
 
   public async execute(message: IMessage, args: string[]) {

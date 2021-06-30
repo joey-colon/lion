@@ -5,7 +5,7 @@ import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
 import { LionClient } from '../common/lion_client';
-import { GuildService } from '../util/guild';
+import { GuildManager } from '../util/guild';
 
 export interface IPluginState {
   name: string;
@@ -23,7 +23,7 @@ export class PluginService {
 
   public async initPluginState(client: LionClient): Promise<void> {
 
-    const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(client).id });
+    const fetchedStates = await PluginStateModel.find({ guildID: GuildManager.getGuild(client).id });
 
     // Set all of the plugins to the persisted state.
     Object.values(this.plugins).forEach(plugin => {

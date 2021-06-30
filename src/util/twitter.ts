@@ -60,7 +60,7 @@ http.interceptors.request.use((config): AxiosRequestConfig => {
   return config;
 });
 
-export const TwitterService = {
+export const Twitter = {
   /**
    * Gets the latest tweets from the given user.
    * 

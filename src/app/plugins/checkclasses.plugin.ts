@@ -2,7 +2,7 @@ import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 
 export default class CheckClassesPlugin extends Plugin {
   public commandName: string = 'checkclasses';
@@ -20,7 +20,7 @@ export default class CheckClassesPlugin extends Plugin {
   public async execute(message: IMessage, args: string[]) {
     const targetUserName = args.join(' ');
 
-    const member = GuildService.getGuild(this.client)
+    const member = GuildManager.getGuild(this.client)
       .members.cache.filter((m) => m.user.tag === targetUserName)
       .first();
     if (!member) {

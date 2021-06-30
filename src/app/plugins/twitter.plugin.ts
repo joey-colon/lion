@@ -1,7 +1,7 @@
 import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { TwitterTimelineResponse, TwitterService } from '../../util/twitter';
+import { TwitterTimelineResponse, Twitter } from '../../util/twitter';
 
 export default class TwitterPlugin extends Plugin {
   public commandName: string = 'twitter';
@@ -47,7 +47,7 @@ export default class TwitterPlugin extends Plugin {
     await Promise.all([message.react('👍'), message.reply('Sure thing! Getting latest tweets!')]);
 
     // Fetch respective tweets.
-    const response = await TwitterService.getLatestTweets(accountId, this._maxSize);
+    const response = await Twitter.getLatestTweets(accountId, this._maxSize);
     const embeds = await this._createEmbeds(response, accountId);
 
     // Lazy-load webhook
@@ -59,7 +59,7 @@ export default class TwitterPlugin extends Plugin {
   }
 
   private async _createEmbeds(tweets: TwitterTimelineResponse, id: string): Promise<MessageEmbed[]> {
-    const user = await TwitterService.getUser(id);
+    const user = await Twitter.getUser(id);
 
     return tweets.data.map(tweet => {
       const embed = new MessageEmbed();

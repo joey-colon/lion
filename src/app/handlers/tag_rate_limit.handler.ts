@@ -1,7 +1,7 @@
 import { IHandler, IMessage } from '../../common/types';
 import { Guild } from 'discord.js';
 import { MessageService } from '../../util/message';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
@@ -19,7 +19,7 @@ export class TagRateLimitHandler implements IHandler {
       return;
     }
 
-    const guild = GuildService.getGuild(message.client);
+    const guild = GuildManager.getGuild(message.client);
 
     const guild_map: Map<string, number[]> =
       this._TAGS_MAP.get(guild) ?? new Map<string, number[]>();

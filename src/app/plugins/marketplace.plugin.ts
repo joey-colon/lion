@@ -3,7 +3,7 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
 import { MessageService } from '../../util/message';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
@@ -165,7 +165,7 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
-    const guild = GuildService.getGuild(msg.client);
+    const guild = GuildManager.getGuild(msg.client);
     const isInServer = Boolean(guild.members.cache.get(user.id));
     if (!isInServer) {
       return;
@@ -179,10 +179,10 @@ export default class MarketPlacePlugin extends Plugin {
       return this._LINK_PREFIX;
     }
 
-    const guild = GuildService.getGuild(this.client);
+    const guild = GuildManager.getGuild(this.client);
 
     const guildID = guild.id;
-    const chanID = GuildService.getChannel(this.client, Constants.Channels.Public.BuySellTrade)!.id;
+    const chanID = GuildManager.getChannel(this.client, Constants.Channels.Public.BuySellTrade)!.id;
     this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     return this._LINK_PREFIX;
   }

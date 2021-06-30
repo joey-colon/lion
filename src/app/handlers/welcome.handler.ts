@@ -2,7 +2,7 @@ import { GuildMember, MessageEmbed } from 'discord.js';
 import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { UserService } from '../../util/user';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
@@ -26,7 +26,7 @@ export class WelcomeHandler implements IHandler {
     embed.title = 'Welcome!';
     embed.setURL(this._LION_URL);
 
-    const icon = GuildService.getGuild(this.client).iconURL();
+    const icon = GuildManager.getGuild(this.client).iconURL();
     if (icon) {
       embed.setThumbnail(icon);
     }

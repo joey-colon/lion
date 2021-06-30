@@ -1,7 +1,7 @@
 import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
 import { Maybe } from '../common/types';
 import { LionClient } from '../common/lion_client';
-import { GuildService } from '../util/guild';
+import { GuildManager } from '../util/guild';
 import { Moderation } from './moderation.service';
 
 export class WarningService {
@@ -23,10 +23,10 @@ export class WarningService {
 
   private async _createChannelForWarn(message: string, rep: Moderation.Report) {
     if (!this._warnCategory) {
-      this._warnCategory = GuildService.getChannel(this._clientService, 'warnings') as CategoryChannel;
+      this._warnCategory = GuildManager.getChannel(this._clientService, 'warnings') as CategoryChannel;
     }
 
-    const member = GuildService.getGuild(this._clientService).members.cache.get(rep.user);
+    const member = GuildManager.getGuild(this._clientService).members.cache.get(rep.user);
     if (!member) {
       return;
     }
@@ -39,7 +39,7 @@ export class WarningService {
     await embed.react(this.ACKNOWLEDGE_EMOJI);
 
     // Give user Supsended Role until they acknowledge
-    await member.roles.add(GuildService.getRole(this._clientService, 'Suspended')!);
+    await member.roles.add(GuildManager.getRole(this._clientService, 'Suspended')!);
   }
 
   private _getChanForUser(rep: Moderation.Report, warnCat: CategoryChannel) {
@@ -47,9 +47,9 @@ export class WarningService {
       return this._chanMap.get(rep.user) as GuildChannel;
     }
 
-    const guild = GuildService.getGuild(this._clientService);
+    const guild = GuildManager.getGuild(this._clientService);
     const { id } = guild;
-    const modID = GuildService.getRole(this._clientService, 'Moderator')!.id;
+    const modID = GuildManager.getRole(this._clientService, 'Moderator')!.id;
 
     return guild.channels.create(rep.user, {
       parent: warnCat,
@@ -80,10 +80,10 @@ export class WarningService {
   }
 
   public async deleteChan(id: Snowflake) {
-    const guild = GuildService.getGuild(this._clientService);
+    const guild = GuildManager.getGuild(this._clientService);
     await guild
       .members.cache.get(id)
-      ?.roles.remove(GuildService.getRole(this._clientService, 'Suspended')!);
+      ?.roles.remove(GuildManager.getRole(this._clientService, 'Suspended')!);
 
     let chan = this._chanMap.get(id);
     if (!chan) {

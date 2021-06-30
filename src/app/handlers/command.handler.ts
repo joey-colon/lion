@@ -4,7 +4,7 @@ import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
 import { LionClient } from '../../common/lion_client';
-import { ChannelService } from '../../util/channel';
+import { ChannelManager } from '../../util/channel';
 import winston from 'winston';
 
 export class CommandHandler implements types.IHandler {
@@ -52,7 +52,7 @@ export class CommandHandler implements types.IHandler {
 
       // Check channel type
       const permLevel = plugin.permission;
-      if (permLevel !== ChannelService.getChannelType(currentChannelName)) {
+      if (permLevel !== ChannelManager.getChannelType(currentChannelName)) {
         return false;
       }
 

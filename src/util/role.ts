@@ -14,7 +14,7 @@ function getHighestRole(roles: Collection<string, Role>) {
   return highestRole;
 }
 
-export const RoleService = {
+export const RoleManager = {
   hasPermission(member: GuildMember, minRoleToRun: number) {
     const roles = member.roles;
     const highestRole = getHighestRole(roles.cache);

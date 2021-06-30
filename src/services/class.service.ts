@@ -19,7 +19,7 @@ import {
   IClassRequest,
 } from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
-import { GuildService } from '../util/guild';
+import { GuildManager } from '../util/guild';
 import levenshtein from 'js-levenshtein';
 import { LionClient } from '../common/lion_client';
 export class ClassService {
@@ -35,7 +35,7 @@ export class ClassService {
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
   constructor(private _clientService: LionClient) {
-    this._guild = GuildService.getGuild(_clientService);
+    this._guild = GuildManager.getGuild(_clientService);
     this._addClasses();
   }
 
@@ -194,7 +194,7 @@ export class ClassService {
   }
 
   private _addClasses(): void {
-    GuildService.getGuild(this._clientService).channels.cache.forEach((channel) => {
+    GuildManager.getGuild(this._clientService).channels.cache.forEach((channel) => {
       if (!channel.parentID) {
         return;
       }
@@ -331,10 +331,10 @@ export class ClassService {
     }
 
     if (!this._CLASS_VC_CAT) {
-      this._CLASS_VC_CAT = GuildService.getChannel(this._clientService, 'class voice') as CategoryChannel;
+      this._CLASS_VC_CAT = GuildManager.getChannel(this._clientService, 'class voice') as CategoryChannel;
     }
 
-    const everyoneRole = GuildService.getRole(this._clientService, '@everyone');
+    const everyoneRole = GuildManager.getRole(this._clientService, '@everyone');
     return this._guild.channels.create(classChan.name, {
       type: 'voice',
       parent: this._CLASS_VC_CAT,

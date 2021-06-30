@@ -4,7 +4,7 @@ import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
 import { LionClient } from '../common/lion_client';
-import { GuildService } from './guild';
+import { GuildManager } from './guild';
 
 interface IUserOverallEntry {
   player: User;
@@ -68,7 +68,7 @@ export class GameLeaderboardService {
       return;
     }
 
-    const guildId = GuildService.getGuild(this._clientService).id;
+    const guildId = GuildManager.getGuild(this._clientService).id;
 
     // Get the entry for the user
     let userDoc = await leaderboard.findOne({
@@ -173,7 +173,7 @@ export class GameLeaderboardService {
   }
 
   private async _parseCollectionData(leaderboard: mongoose.Model<IGameLeaderBoardEntry>): Promise<IUserOverallEntry[]> {
-    const guildId = GuildService.getGuild(this._clientService).id;
+    const guildId = GuildManager.getGuild(this._clientService).id;
     const res = await leaderboard.find({ guildId });
     return res.reduce((acc: IUserOverallEntry[], doc: IGameLeaderBoardEntry) => {
       const stats = this._getOverallStats(doc);
@@ -187,7 +187,7 @@ export class GameLeaderboardService {
   }
 
   public async createMatchupLeaderboardEmbed(userOne: User, userTwo: User, gameType: GameType) {
-    const guildId = GuildService.getGuild(this._clientService).id;
+    const guildId = GuildManager.getGuild(this._clientService).id;
     const leaderboard: mongoose.Model<IGameLeaderBoardEntry> = gameEnumToCollection[gameType];
     if (!mongoose.connection.readyState) {
       winston.error(`Could not get leaderboard for ${gameType}`);
@@ -236,7 +236,7 @@ export class GameLeaderboardService {
   }
 
   private _getOverallStats(entry: IGameLeaderBoardEntry): Maybe<IUserOverallEntry> {
-    const user = GuildService.getGuild(this._clientService)
+    const user = GuildManager.getGuild(this._clientService)
       .members.cache.get(entry.userId)?.user;
     if (!user) {
       return null;

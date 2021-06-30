@@ -10,8 +10,8 @@ import winston from 'winston';
 import Constants from '../common/constants';
 import { IHandler, IMessage, Mode } from '../common/types';
 import { LionClient } from '../common/lion_client';
-import { GuildService } from '../util/guild';
-import { HandlerService } from '../util/handler';
+import { GuildManager } from '../util/guild';
+import { Handlers } from '../util/handler';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -40,8 +40,6 @@ export class Listener {
     this.client.on('ready', async () => {
       winston.info(`Loaded ${this.client.jobService.size()} jobs...`);
 
-      this.client.initClasses();
-
       // Load in plugin states.
       await this.client.pluginService.initPluginState(this.client);
 
@@ -53,7 +51,7 @@ export class Listener {
         return;
       }
 
-      const notificationChannel = GuildService
+      const notificationChannel = GuildManager
         .getChannel(this.client, Constants.Channels.Public.LionProjectGithub) as TextChannel;
 
       const embed = new MessageEmbed();
@@ -129,7 +127,7 @@ export class Listener {
         `Attempting extra lookup of ${message.author.tag} to a GuildMember`
       );
 
-      const member = GuildService.getGuild(message.client).members.fetch(message.author.id);
+      const member = GuildManager.getGuild(message.client).members.fetch(message.author.id);
 
       // Removed as message.member is now read only
       // message.member = member;
@@ -148,31 +146,31 @@ export class Listener {
   }
 
   private _initializeHandlers(): void {
-    HandlerService.messageHandlers.forEach((Handler) => {
+    Handlers.messageHandlers.forEach((Handler) => {
       this._messageHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.messageUpdateHandlers.forEach((Handler) => {
+    Handlers.messageUpdateHandlers.forEach((Handler) => {
       this._messageUpdateHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.privateMessageHandlers.forEach((Handler) => {
+    Handlers.privateMessageHandlers.forEach((Handler) => {
       this._privateMessageHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.channelHandlers.forEach((Handler) => {
+    Handlers.channelHandlers.forEach((Handler) => {
       this._channelHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.userUpdateHandlers.forEach((Handler) => {
+    Handlers.userUpdateHandlers.forEach((Handler) => {
       this._userUpdateHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.memberAddHandlers.forEach((Handler) => {
+    Handlers.memberAddHandlers.forEach((Handler) => {
       this._memberAddHandlers.push(new Handler(this.client));
     });
 
-    HandlerService.reactionHandlers.forEach((Handler) => {
+    Handlers.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.client));
     });
   }

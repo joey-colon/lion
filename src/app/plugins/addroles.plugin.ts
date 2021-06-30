@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable, Guild } from 'discord.js';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
@@ -22,7 +22,7 @@ export default class AddRolesPlugin extends Plugin {
 
   constructor(client: LionClient) {
     super(client);
-    this._guild = GuildService.getGuild(client);
+    this._guild = GuildManager.getGuild(client);
   }
 
   public validate(message: IMessage, args: string[]) {

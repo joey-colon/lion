@@ -12,7 +12,7 @@ import { LionPingHandler } from '../app/handlers/lionping.handler';
 import { MemberCountHandler } from '../app/handlers/membercount.handler';
 import { EveryoneHandler } from '../app/handlers/everyone.handler';
 
-export const HandlerService = {
+export const Handlers = {
   messageHandlers: [
     BlacklistHandler,
     CommandHandler,

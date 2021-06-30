@@ -1,6 +1,6 @@
 import { Guild, Role, User, GuildChannel, Client } from 'discord.js';
 
-export const GuildService = {
+export const GuildManager = {
   getGuild(client: Client): Guild {
     return client.guilds.cache.first()!;
   },

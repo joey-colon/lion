@@ -4,7 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
 import { LionClient } from '../../common/lion_client';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -21,7 +21,7 @@ export default class ModReportPlugin extends Plugin {
 
   constructor(client: LionClient) {
     super(client);
-    this._guild = GuildService.getGuild(client);
+    this._guild = GuildManager.getGuild(client);
   }
 
   public async execute(message: IMessage, args: string[]) {

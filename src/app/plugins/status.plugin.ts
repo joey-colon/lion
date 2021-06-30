@@ -47,7 +47,7 @@ export default class StatusPlugin extends Plugin {
   }
 
   private _getUptime() {
-    const startDate: Date = this.client.getStartDate();
+    const startDate: Date = this.client.startDate;
     const currentDate: Date = new Date();
 
     const days = currentDate.getDay() - startDate.getDay();

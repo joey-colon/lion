@@ -2,7 +2,7 @@ import { User } from 'discord.js';
 import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { MessageService } from '../../util/message';
 import { UserService } from '../../util/user';
 
@@ -49,7 +49,7 @@ export default class RegisterPlugin extends Plugin {
 
   private async _attemptAddClass(className: string, user: User): Promise<string> {
     if (className.toLowerCase() === 'all') {
-      const isModerator = GuildService.userHasRole(user, 'Moderator');
+      const isModerator = GuildManager.userHasRole(user, 'Moderator');
       if (!isModerator) {
         return 'You must be a `Moderator` to register for `all`.';
       }

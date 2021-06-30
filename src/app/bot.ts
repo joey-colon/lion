@@ -6,8 +6,10 @@ import { Plugin } from '../common/plugin';
 import { LionClient } from '../common/lion_client';
 import winston from 'winston';
 import { StoreService } from '../services/store.service';
+import { Listener } from './listener';
 
 export class Bot {
+  private _listener!: Listener;
   private _webServer!: Express;
   public client: LionClient;
   private _webServerInstance: Server.Server | undefined;
@@ -18,6 +20,7 @@ export class Bot {
   }
 
   private _initialise(): void {
+    this._listener = new Listener(this.client);
     this._webServer = express();
   }
 
@@ -108,8 +111,6 @@ export class Bot {
           await waiting;
         }
       } catch (e) {
-        console.log('here');
-        console.log(e);
         winston.error('Bot crashed with error: ' + e);
 
         // re-init everything before restarting loop

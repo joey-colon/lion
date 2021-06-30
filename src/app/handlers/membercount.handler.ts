@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { IHandler, IServerInfo } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 
 export class MemberCountHandler implements IHandler {
@@ -45,7 +45,7 @@ export class MemberCountHandler implements IHandler {
       return;
     }
 
-    const announcementChannel = GuildService.getChannel(
+    const announcementChannel = GuildManager.getChannel(
       member.client,
       Constants.Channels.Info.Announcements
     ) as TextChannel;

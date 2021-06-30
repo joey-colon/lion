@@ -1,7 +1,7 @@
 import { Client, GuildMember, Role } from 'discord.js';
 import moment from 'moment';
 import { Maybe } from '../common/types';
-import { GuildService } from './guild';
+import { GuildManager } from './guild';
 
 const nonNumeric: RegExp = /^\d/g;
 export const AGE_THRESHOLD = moment.duration(2, 'days');
@@ -13,7 +13,7 @@ export const UserService = {
   getMember(client: Client, target: string): Maybe<GuildMember> {
     const strippedID = target.replace(nonNumeric, ''); // Remove extra stuff that can come when an @
 
-    return GuildService.getGuild(client)
+    return GuildManager.getGuild(client)
       .members.cache.filter((member) => {
         const { nickname } = member;
         const { tag, username, id } = member.user;

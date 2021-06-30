@@ -1,10 +1,10 @@
 import { ChannelType, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 import { MessageService } from '../util/message';
-import { GuildService } from '../util/guild';
+import { GuildManager } from '../util/guild';
 import { LionClient } from './lion_client';
-import { RoleService } from '../util/role';
-import { ChannelService } from '../util/channel';
+import { RoleManager } from '../util/role';
+import { ChannelManager } from '../util/channel';
 import winston from 'winston';
 
 export abstract class Plugin implements IPlugin {
@@ -51,7 +51,7 @@ export abstract class Plugin implements IPlugin {
   public hasPermission(message: IMessage): boolean {
     const channelName = MessageService.getChannel(message).name;
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
-      const id = GuildService.getChannel(this.client, this.pluginChannelName)!.id;
+      const id = GuildManager.getChannel(this.client, this.pluginChannelName)!.id;
       message.reply(`Please use this command in the <#${id}> channel.`);
       return false;
     }
@@ -63,13 +63,13 @@ export abstract class Plugin implements IPlugin {
     }
 
     const minRoleToRun = this.minRoleToRun ?? 0;
-    const hasRolePerms = RoleService.hasPermission(member, minRoleToRun);
+    const hasRolePerms = RoleManager.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
       message.reply('You must have a higher role to run this command.');
       return false;
     }
 
-    const response = ChannelService.hasPermission(channelName, this.permission);
+    const response = ChannelManager.hasPermission(channelName, this.permission);
     if (!response) {
       const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
 
@@ -92,12 +92,12 @@ export abstract class Plugin implements IPlugin {
       try {
         const id = channels
           .filter((channel) => {
-            return GuildService
+            return GuildManager
               .getChannel(this.client, channel)!
               .permissionsFor(message.member ?? '')
               ?.has('VIEW_CHANNEL');
           })
-          .map((room) => GuildService.getChannel(this.client, room)!.id);
+          .map((room) => GuildManager.getChannel(this.client, room)!.id);
 
         if (id.length === 0) {
           message.reply(`${baseReply} There are no permanent channels of this type.`);

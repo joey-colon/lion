@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { WarningService } from './warning.service';
 import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 import winston from 'winston';
-import { GuildService } from '../util/guild';
+import { GuildManager } from '../util/guild';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -128,7 +128,7 @@ export class ModService {
 
     winston.info(`Filing report with ticket_id ${ticket_id}`);
 
-    const userOffenseChan = GuildService.getGuild(this._clientService)!
+    const userOffenseChan = GuildManager.getGuild(this._clientService)!
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
     if (!userOffenseChan) {
@@ -160,7 +160,7 @@ export class ModService {
     }
 
     const [, user_id] = decoded;
-    const user = GuildService.getGuild(this._clientService).members.cache.get(user_id);
+    const user = GuildManager.getGuild(this._clientService).members.cache.get(user_id);
 
     if (!user) {
       winston.error(
@@ -201,7 +201,7 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
-    const member = GuildService.getGuild(this._clientService).members.cache.get(report.user);
+    const member = GuildManager.getGuild(this._clientService).members.cache.get(report.user);
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
     }
@@ -261,7 +261,7 @@ export class ModService {
       reportId: reportResult,
     });
 
-    const guild = GuildService.getGuild(this._clientService);
+    const guild = GuildManager.getGuild(this._clientService);
 
     try {
       await guild
@@ -441,7 +441,7 @@ export class ModService {
       return;
     }
 
-    const guild = GuildService.getGuild(this._clientService);
+    const guild = GuildManager.getGuild(this._clientService);
     const bulk = ModerationBanModel.collection.initializeUnorderedBulkOp();
 
     const sevenDaysAgo = new Date();

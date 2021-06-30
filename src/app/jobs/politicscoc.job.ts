@@ -1,7 +1,7 @@
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
@@ -17,7 +17,7 @@ export class PoliticsCoCReminder extends Job {
     try {
       winston.debug(`Starting ${this.name} job`);
 
-      const guild = GuildService.getGuild(client);
+      const guild = GuildManager.getGuild(client);
       if (!guild) {
         winston.warn('No guild yet');
         return;
@@ -33,7 +33,7 @@ export class PoliticsCoCReminder extends Job {
         return;
       }
 
-      const codeOfConduct = GuildService.getGuild(client)
+      const codeOfConduct = GuildManager.getGuild(client)
         .channels.cache.find((c) => c.name === Constants.Channels.Info.CodeOfConduct);
 
       if (!codeOfConduct) {

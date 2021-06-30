@@ -11,7 +11,7 @@ function buildMongoConnectionString(): string {
   );
 }
 
-export const StorageService = {
+export const StorageManager = {
   async connectToDB() {
     const connectionString = buildMongoConnectionString();
 

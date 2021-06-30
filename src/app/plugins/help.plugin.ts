@@ -3,7 +3,7 @@ import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed, TextChannel } from 'discord.js';
 import { MessageService } from '../../util/message';
-import { ChannelService } from '../../util/channel';
+import { ChannelManager } from '../../util/channel';
 
 export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';
@@ -32,7 +32,7 @@ export default class HelpPlugin extends Plugin {
   }
 
   private _getEmbed(message: IMessage, type: string) {
-    const currentChanPerm = ChannelService.getChannelType(
+    const currentChanPerm = ChannelManager.getChannelType(
       (message.channel as TextChannel).name
     );
 

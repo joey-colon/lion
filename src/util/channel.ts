@@ -26,7 +26,7 @@ channelCategories.forEach((type: ChannelType) => {
   channels.set(type, channelsCategories);
 });
 
-export const ChannelService = {
+export const ChannelManager = {
   getChannelType(channel: string) {
     const categories = channelCategories;
 

@@ -3,14 +3,14 @@ import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { AGE_THRESHOLD, UserService } from '../../util/user';
 import { MessageService } from '../../util/message';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { LionClient } from '../../common/lion_client';
 
 export class NewMemberRoleHandler implements IHandler {
   constructor(public client: LionClient) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const unverifiedRole = GuildService.getRole(this.client, Constants.Roles.Unverifed)!;
+    const unverifiedRole = GuildManager.getRole(this.client, Constants.Roles.Unverifed)!;
     const shouldUnverify = UserService.shouldUnverify(member);
     if (!shouldUnverify) {
       return;
@@ -26,7 +26,7 @@ export class NewMemberRoleHandler implements IHandler {
   }
 
   private _pingUserInVerify(member: GuildMember) {
-    const verifyChannel = GuildService.getChannel(
+    const verifyChannel = GuildManager.getChannel(
       member.client,
       Constants.Channels.Bot.Verify
     ) as TextChannel;

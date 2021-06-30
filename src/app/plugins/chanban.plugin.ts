@@ -3,7 +3,7 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 
 export default class ChanBanPlugin extends Plugin {
   public commandName: string = 'chanban';
@@ -32,7 +32,7 @@ export default class ChanBanPlugin extends Plugin {
 
     const [, username, channels] = match;
 
-    const guild = GuildService.getGuild(this.client);
+    const guild = GuildManager.getGuild(this.client);
     const channel_objs =
       channels
         .match(this._channelIDRegex)

@@ -2,7 +2,7 @@ import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IHandler, IMessage } from '../../common/types';
 import { LionClient } from '../../common/lion_client';
-import { GuildService } from '../../util/guild';
+import { GuildManager } from '../../util/guild';
 import { UserService } from '../../util/user';
 
 export class EveryoneHandler implements IHandler {
@@ -22,7 +22,7 @@ export class EveryoneHandler implements IHandler {
       return;
     }
 
-    const botLogsChannel = GuildService.getChannel(message.client, Constants.Channels.Admin.BotLogs);
+    const botLogsChannel = GuildManager.getChannel(message.client, Constants.Channels.Admin.BotLogs);
     await Promise.all([
       message.author
         .send(
