@@ -1,12 +1,7 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any*/
 
 import { AxiosResponse } from 'axios';
-import { IContainer as BottleContainer } from 'bottlejs';
 import * as discord from 'discord.js';
-import { JobService } from '../services/job.service';
-import { StoreService } from '../services/store.service';
-import { PollService } from '../services/poll.service';
-import { WarningService } from '../services/warning.service';
 import { Document } from 'mongoose';
 import { ClientService } from '../services/client.service';
 
@@ -32,13 +27,6 @@ export interface IPlugin {
   hasPermission(message: IMessage): boolean;
   execute(message: IMessage, args?: string[]): Promise<void> | void;
   isActive: boolean;
-}
-
-export interface IContainer extends BottleContainer {
-  jobService: JobService;
-  storeService: StoreService;
-  pollService: PollService;
-  warningService: WarningService;
 }
 
 export interface IMessage extends discord.Message {}
