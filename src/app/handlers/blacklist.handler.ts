@@ -1,10 +1,10 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IHandler, IMessage, ClassType } from '../../common/types';
-import { ClientService } from '../../services/client.service';
-import { MessageService } from '../../services/message.service';
+import { LionClient } from '../../common/client.service';
+import { MessageService } from '../../util/message';
 import { Moderation } from '../../services/moderation.service';
-import { UserService } from '../../services/user.service';
+import { UserService } from '../../util/user';
 
 interface ILinkLabel {
   regex: RegExp;
@@ -21,7 +21,7 @@ export class BlacklistHandler implements IHandler {
   ];
 
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public execute(message: IMessage): void {
     const channel = message.channel as TextChannel;

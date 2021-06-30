@@ -4,8 +4,8 @@ import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
+import { LionClient } from '../common/client.service';
+import { GuildService } from '../util/guild';
 
 export interface IPluginState {
   name: string;
@@ -21,7 +21,7 @@ export class PluginService {
 
   private readonly _NUM_DISPLAY = 10;
 
-  public async initPluginState(client: ClientService): Promise<void> {
+  public async initPluginState(client: LionClient): Promise<void> {
 
     const fetchedStates = await PluginStateModel.find({ guildID: GuildService.getGuild(client).id });
 

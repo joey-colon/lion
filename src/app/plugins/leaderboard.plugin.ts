@@ -2,7 +2,7 @@ import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, Maybe } from '../../common/types';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 import { gameAliases, GameLeaderboardService, GameType } from '../../services/gameleaderboard.service';
 
 export default class LeaderboardPlugin extends Plugin {
@@ -20,7 +20,7 @@ export default class LeaderboardPlugin extends Plugin {
 
   private _leaderboard: GameLeaderboardService;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     this._leaderboard = new GameLeaderboardService(client);
   }

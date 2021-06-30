@@ -1,7 +1,7 @@
 import { MessageEmbed, TextChannel, Webhook } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { TwitterTimelineResponse, TwitterService } from '../../services/twitter.service';
+import { TwitterTimelineResponse, TwitterService } from '../../util/twitter';
 
 export default class TwitterPlugin extends Plugin {
   public commandName: string = 'twitter';

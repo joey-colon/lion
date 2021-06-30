@@ -3,13 +3,13 @@ import Constants from '../../common/constants';
 import { IHandler, IServerInfo } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 
 export class MemberCountHandler implements IHandler {
   private _MILESTONE_INTERVAL: number = 100;
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
   public async execute(member: GuildMember) {
     const knightEmoji = member.guild.emojis.cache.find((e) => e.name === 'knight');
 

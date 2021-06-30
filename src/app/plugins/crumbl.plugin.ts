@@ -5,7 +5,7 @@ import { Plugin } from '../../common/plugin';
 import { IHttpResponse, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
-import { MessageService } from '../../services/message.service';
+import { MessageService } from '../../util/message';
 import winston from 'winston';
 
 export default class CrumblPlugin extends Plugin {

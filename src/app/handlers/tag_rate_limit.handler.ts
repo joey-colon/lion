@@ -1,8 +1,8 @@
 import { IHandler, IMessage } from '../../common/types';
 import { Guild } from 'discord.js';
-import { MessageService } from '../../services/message.service';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { MessageService } from '../../util/message';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 export class TagRateLimitHandler implements IHandler {
@@ -11,7 +11,7 @@ export class TagRateLimitHandler implements IHandler {
 
   private _TAGS_MAP = new Map<Guild, Map<string, number[]>>();
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public execute(message: IMessage) {
     // guard against message.member being null

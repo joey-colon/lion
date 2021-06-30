@@ -9,9 +9,9 @@ import {
 import winston from 'winston';
 import Constants from '../common/constants';
 import { IHandler, IMessage, Mode } from '../common/types';
-import { ClientService } from '../services/client.service';
-import { GuildService } from '../services/guild.service';
-import { HandlerService } from '../services/handler.service';
+import { LionClient } from '../common/client.service';
+import { GuildService } from '../util/guild';
+import { HandlerService } from '../util/handler';
 export class Listener {
   private _messageHandlers: IHandler[] = [];
   private _messageUpdateHandlers: IHandler[] = [];
@@ -21,7 +21,7 @@ export class Listener {
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
 
-  constructor(public client: ClientService) {
+  constructor(public client: LionClient) {
     this._initializeHandlers();
 
     this.client.on('channelCreate', async () => {

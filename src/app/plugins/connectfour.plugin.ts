@@ -3,7 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, Maybe } from '../../common/types';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 import { GameLeaderboardService, GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class ConnectFourPlugin extends Plugin {
@@ -19,7 +19,7 @@ export default class ConnectFourPlugin extends Plugin {
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     this._leaderBoard = new GameLeaderboardService(client);
   }

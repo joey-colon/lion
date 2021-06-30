@@ -1,7 +1,7 @@
 import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
 import { Maybe } from '../common/types';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
+import { LionClient } from '../common/client.service';
+import { GuildService } from '../util/guild';
 import { Moderation } from './moderation.service';
 
 export class WarningService {
@@ -10,7 +10,7 @@ export class WarningService {
 
   public ACKNOWLEDGE_EMOJI = '👍';
 
-  constructor(private _clientService: ClientService) {}
+  constructor(private _clientService: LionClient) {}
 
   public async sendModMessageToUser(message: string, rep: Moderation.Report) {
     await this._clientService.users.cache

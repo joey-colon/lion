@@ -1,7 +1,7 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, IUser } from '../../common/types';
 import Constants from '../../common/constants';
-import { GuildService } from '../../services/guild.service';
+import { GuildService } from '../../util/guild';
 
 export default class UserCountPlugin extends Plugin {
   public commandName: string = 'users';

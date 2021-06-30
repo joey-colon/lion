@@ -1,12 +1,12 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IMessage, IHandler } from '../../common/types';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 
 export class CountingHandler implements IHandler {
   private _NUMBER_REGEX: RegExp = /^\d+$/;
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(message: IMessage): Promise<void> {
     const chan = message.channel as TextChannel;

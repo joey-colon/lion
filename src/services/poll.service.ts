@@ -1,6 +1,6 @@
 import { IMessage } from '../common/types';
 import { MessageEmbed } from 'discord.js';
-import { ClientService } from './client.service';
+import { LionClient } from '../common/client.service';
 
 export class Poll {
   start: Date;
@@ -26,7 +26,7 @@ export class PollService {
   'https://lh3.googleusercontent.com/proxy/IaTnrKy9cYTemCPbTIEKTs' +
     'OcCLbNiX01u9G8CXyLwQ4475sdXJqIPmR7nFYydVS8hDEAOP77o6PwXPPUfzduOzK1';
 
-  constructor(private _clientService: ClientService) {}
+  constructor(private _clientService: LionClient) {}
 
   public createStartEmbed(exp: number, question: string, answers: string[]): MessageEmbed {
     const embed = new MessageEmbed();

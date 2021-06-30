@@ -1,8 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
-import { GuildService } from '../../services/guild.service';
-import { MessageService } from '../../services/message.service';
+import { GuildService } from '../../util/guild';
+import { MessageService } from '../../util/message';
 
 export default class ListRolesPlugin extends Plugin {
   public commandName: string = 'listroles';

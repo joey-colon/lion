@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { GuildService } from '../../services/guild.service';
+import { GuildService } from '../../util/guild';
 import winston from 'winston';
 
 interface IChannel {

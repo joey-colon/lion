@@ -1,8 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { GuildEmoji, EmojiIdentifierResolvable, Guild } from 'discord.js';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 export default class AddRolesPlugin extends Plugin {
@@ -20,7 +20,7 @@ export default class AddRolesPlugin extends Plugin {
   };
   private _guild: Guild;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     this._guild = GuildService.getGuild(client);
   }

@@ -1,7 +1,7 @@
 import { Bot } from './app/bot';
 import dotenv from 'dotenv';
-import { StorageService } from './services/storage.service';
-import { ClientService } from './services/client.service';
+import { StorageService } from './util/storage';
+import { LionClient } from './common/client.service';
 
 (async function main() {
   // Load env vars in.
@@ -10,7 +10,7 @@ import { ClientService } from './services/client.service';
   // Connect to DB
   await StorageService.connectToDB();
 
-  const app = new Bot(new ClientService());
+  const app = new Bot(new LionClient());
   app.run();
 })();
 

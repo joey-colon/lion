@@ -1,12 +1,12 @@
 import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
 import { IHandler, IMessage, ClassType } from '../../common/types';
-import { ClientService } from '../../services/client.service';
-import { GuildService } from '../../services/guild.service';
+import { LionClient } from '../../common/client.service';
+import { GuildService } from '../../util/guild';
 
 export class ReactHandler implements IHandler {
   private _PIN_THRESH = 5;
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(reaction: MessageReaction, user: User): Promise<void> {
     const message = reaction.message;

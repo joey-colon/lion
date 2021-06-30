@@ -3,7 +3,7 @@ import moment from 'moment';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, Maybe } from '../../common/types';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 import { GameLeaderboardService, GameResult, GameType } from '../../services/gameleaderboard.service';
 
 export default class TicTacToe extends Plugin {
@@ -18,7 +18,7 @@ export default class TicTacToe extends Plugin {
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
   private _leaderboard: GameLeaderboardService;
 
-  constructor(public client: ClientService) {
+  constructor(public client: LionClient) {
     super(client);
     this._leaderboard = new GameLeaderboardService(client);
   }

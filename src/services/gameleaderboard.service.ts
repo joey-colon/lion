@@ -3,8 +3,8 @@ import mongoose, { Document } from 'mongoose';
 import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
-import { ClientService } from './client.service';
-import { GuildService } from './guild.service';
+import { LionClient } from '../common/client.service';
+import { GuildService } from '../util/guild';
 
 interface IUserOverallEntry {
   player: User;
@@ -57,7 +57,7 @@ const gameEnumToCollection: Record<GameType, mongoose.Model<IGameLeaderBoardEntr
 export class GameLeaderboardService {
 
   constructor(
-    private _clientService: ClientService,
+    private _clientService: LionClient,
   ) {}
 
   public async updateLeaderboard(user: User, game: GameType, gameData: IGame) {

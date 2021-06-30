@@ -1,12 +1,12 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IHandler, IMessage } from '../../common/types';
-import { ClientService } from '../../services/client.service';
-import { GuildService } from '../../services/guild.service';
-import { UserService } from '../../services/user.service';
+import { LionClient } from '../../common/client.service';
+import { GuildService } from '../../util/guild';
+import { UserService } from '../../util/user';
 
 export class EveryoneHandler implements IHandler {
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(message: IMessage): Promise<void> {
     if (!message.content.includes('@everyone') || !message.content.includes('@here')) {

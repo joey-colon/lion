@@ -1,7 +1,7 @@
 import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
-import { MessageService } from '../../services/message.service';
+import { MessageService } from '../../util/message';
 
 export default class UnregisterPlugin extends Plugin {
   public commandName: string = 'unregister';

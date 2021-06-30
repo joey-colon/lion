@@ -2,7 +2,7 @@ import { GuildChannel } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType } from '../../common/types';
 import Constants from '../../common/constants';
-import { GuildService } from '../../services/guild.service';
+import { GuildService } from '../../util/guild';
 
 export default class CheckClassesPlugin extends Plugin {
   public commandName: string = 'checkclasses';

@@ -1,8 +1,8 @@
 import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 export class PoliticsCoCReminder extends Job {
@@ -13,7 +13,7 @@ export class PoliticsCoCReminder extends Job {
     super();
   }
 
-  public execute(client: ClientService) {
+  public execute(client: LionClient) {
     try {
       winston.debug(`Starting ${this.name} job`);
 

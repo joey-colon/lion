@@ -4,8 +4,8 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
-import { ClientService } from '../../services/client.service';
-import { MessageService } from '../../services/message.service';
+import { LionClient } from '../../common/client.service';
+import { MessageService } from '../../util/message';
 
 export default class DogPlugin extends Plugin {
   public commandName: string = 'dog';
@@ -26,7 +26,7 @@ export default class DogPlugin extends Plugin {
   private _breedEmbed: Maybe<MessageEmbed>;
   private _subBreedEmbed: Maybe<MessageEmbed>;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     axios
       .get(`${this._API_URL}breeds/list/all`)

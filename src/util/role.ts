@@ -1,4 +1,4 @@
-import { RoleType, RoleTypeKey } from './../common/types';
+import { RoleType, RoleTypeKey } from '../common/types';
 import { GuildMember, Role, Collection } from 'discord.js';
 
 function getHighestRole(roles: Collection<string, Role>) {

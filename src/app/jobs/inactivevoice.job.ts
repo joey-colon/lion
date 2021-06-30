@@ -1,5 +1,5 @@
 import { Job } from '../../common/job';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 
 export class InactiveVoiceJob extends Job {
   public interval: number = 1000 * 60 * 10; // Every 10 mintues
@@ -9,7 +9,7 @@ export class InactiveVoiceJob extends Job {
     super();
   }
 
-  public async execute(client: ClientService) {
+  public async execute(client: LionClient) {
     const vcs = client.classes.getVoiceChannels();
 
     for (const vcObj of vcs) {

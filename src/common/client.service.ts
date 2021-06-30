@@ -1,12 +1,12 @@
 import { Client } from 'discord.js';
-import { ClassService } from './class.service';
-import { JobService } from './job.service';
-import { ModService } from './moderation.service';
-import { PluginService } from './plugin.service';
-import { PollService } from './poll.service';
-import { WarningService } from './warning.service';
+import { ClassService } from '../services/class.service';
+import { JobService } from '../services/job.service';
+import { ModService } from '../services/moderation.service';
+import { PluginService } from '../services/plugin.service';
+import { PollService } from '../services/poll.service';
+import { WarningService } from '../services/warning.service';
 
-export class ClientService extends Client {
+export class LionClient extends Client {
   private _startDate: Date;
   public classes!: ClassService;
   public readonly pluginService: PluginService;

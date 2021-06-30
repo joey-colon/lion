@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType } from '../../common/types';
-import { MessageService } from '../../services/message.service';
+import { MessageService } from '../../util/message';
 
 export default class FetchClassChannelsPlugin extends Plugin {
   public commandName: string = 'fetchclasschans';

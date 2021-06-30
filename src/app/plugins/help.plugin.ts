@@ -2,8 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { MessageEmbed, TextChannel } from 'discord.js';
-import { MessageService } from '../../services/message.service';
-import { ChannelService } from '../../services/channel.service';
+import { MessageService } from '../../util/message';
+import { ChannelService } from '../../util/channel';
 
 export default class HelpPlugin extends Plugin {
   public commandName: string = 'help';

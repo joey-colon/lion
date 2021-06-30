@@ -3,8 +3,8 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { ClientService } from '../../services/client.service';
-import { GuildService } from '../../services/guild.service';
+import { LionClient } from '../../common/client.service';
+import { GuildService } from '../../util/guild';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -19,7 +19,7 @@ export default class ModReportPlugin extends Plugin {
   
   private _guild: Guild;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     this._guild = GuildService.getGuild(client);
   }

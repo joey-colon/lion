@@ -1,6 +1,6 @@
 import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
 import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, Client } from 'discord.js';
-import { GuildService } from './guild.service';
+import { GuildService } from './guild';
 import Constants from '../common/constants';
 import * as moment from 'moment';
 import winston from 'winston';

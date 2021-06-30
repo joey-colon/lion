@@ -3,8 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
-import { MessageService } from '../../services/message.service';
-import { ClientService } from '../../services/client.service';
+import { MessageService } from '../../util/message';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 class Breed {
@@ -25,7 +25,7 @@ export default class CatPlugin extends Plugin {
   private _breeds: Breed[] = [];
   private _embedBreeds: Maybe<MessageEmbed>;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     // creates list of breeds
     axios

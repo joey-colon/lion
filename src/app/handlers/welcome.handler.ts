@@ -1,15 +1,15 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
-import { UserService } from '../../services/user.service';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { UserService } from '../../util/user';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 export class WelcomeHandler implements IHandler {
   private _LION_URL: string = 'https://github.com/joey-colon/lion';
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const shouldUnverify = UserService.shouldUnverify(member);

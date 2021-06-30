@@ -1,7 +1,7 @@
 import { IHandler, IMessage } from '../../common/types';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 import winston from 'winston';
 
 export class RequireUrlHandler implements IHandler {
@@ -12,7 +12,7 @@ export class RequireUrlHandler implements IHandler {
     Constants.Channels.Public.Networking,
   ];
 
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(message: IMessage) {
     const channelObj: TextChannel = this.client.channels.cache.get(

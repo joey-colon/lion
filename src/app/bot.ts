@@ -5,7 +5,7 @@ import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
-import { ClientService } from '../services/client.service';
+import { LionClient } from '../common/client.service';
 import winston from 'winston';
 import { StoreService } from '../services/store.service';
 
@@ -13,10 +13,10 @@ export class Bot {
   private _kernel!: Kernel;
   private _listener!: Listener;
   private _webServer!: Express;
-  public client: ClientService;
+  public client: LionClient;
   private _webServerInstance: Server.Server | undefined;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     this.client = client;
     this._initialise();
   }

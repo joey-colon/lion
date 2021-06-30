@@ -4,7 +4,7 @@ import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 import axios from 'axios';
-import { GuildService } from '../../services/guild.service';
+import { GuildService } from '../../util/guild';
 import winston from 'winston';
 
 interface IRoleInfo {

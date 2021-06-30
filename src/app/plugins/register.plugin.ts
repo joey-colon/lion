@@ -2,9 +2,9 @@ import { User } from 'discord.js';
 import winston from 'winston';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, IEmbedData, ClassType } from '../../common/types';
-import { GuildService } from '../../services/guild.service';
-import { MessageService } from '../../services/message.service';
-import { UserService } from '../../services/user.service';
+import { GuildService } from '../../util/guild';
+import { MessageService } from '../../util/message';
+import { UserService } from '../../util/user';
 
 export default class RegisterPlugin extends Plugin {
   public commandName: string = 'register';

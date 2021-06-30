@@ -2,7 +2,7 @@ import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
 import WolframAlphaAPI from 'wolfram-alpha-api';
-import { ClientService } from '../../services/client.service';
+import { LionClient } from '../../common/client.service';
 
 export default class WolframAlphaPlugin extends Plugin {
   public commandName: string = 'wolframalpha';
@@ -19,7 +19,7 @@ export default class WolframAlphaPlugin extends Plugin {
   private _errorMessage = "Sorry, I don't know that one";
   private _waAPI;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     super(client);
     this._waAPI = WolframAlphaAPI(process.env.WOLFRAM_APPID!);
   }

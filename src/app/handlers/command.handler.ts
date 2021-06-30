@@ -3,16 +3,16 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
-import { ClientService } from '../../services/client.service';
-import { ChannelService } from '../../services/channel.service';
+import { LionClient } from '../../common/client.service';
+import { ChannelService } from '../../util/channel';
 import winston from 'winston';
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
   private _CANCEL_EMOTE = '❎';
-  public client: ClientService;
+  public client: LionClient;
 
-  constructor(client: ClientService) {
+  constructor(client: LionClient) {
     this.client = client;
   }
 

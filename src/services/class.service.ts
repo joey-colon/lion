@@ -19,9 +19,9 @@ import {
   IClassRequest,
 } from '../common/types';
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
-import { GuildService } from './guild.service';
+import { GuildService } from '../util/guild';
 import levenshtein from 'js-levenshtein';
-import { ClientService } from './client.service';
+import { LionClient } from '../common/client.service';
 export class ClassService {
   private _guild: Guild;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
@@ -34,7 +34,7 @@ export class ClassService {
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
 
-  constructor(private _clientService: ClientService) {
+  constructor(private _clientService: LionClient) {
     this._guild = GuildService.getGuild(_clientService);
     this._addClasses();
   }

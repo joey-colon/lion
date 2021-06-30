@@ -1,14 +1,14 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { ClientService } from './client.service';
+import { LionClient } from '../common/client.service';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
 import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 import winston from 'winston';
-import { GuildService } from './guild.service';
+import { GuildService } from '../util/guild';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -107,7 +107,7 @@ export class ModService {
   private _warningService: WarningService;
 
   constructor(
-    private _clientService: ClientService
+    private _clientService: LionClient
   ) {
     this._warningService = new WarningService(_clientService);
   }

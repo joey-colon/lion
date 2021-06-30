@@ -4,8 +4,8 @@ import { IMessage, ChannelType } from '../../common/types';
 import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
-import { UserService } from '../../services/user.service';
-import { GuildService } from '../../services/guild.service';
+import { UserService } from '../../util/user';
+import { GuildService } from '../../util/guild';
 
 export default class TaPlugin extends Plugin {
   public commandName: string = 'ta';

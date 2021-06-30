@@ -2,7 +2,7 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
 import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
 import Constants from '../../common/constants';
-import { GuildService } from '../../services/guild.service';
+import { GuildService } from '../../util/guild';
 
 export default class BroadcastPlugin extends Plugin {
   public commandName: string = 'broadcast';

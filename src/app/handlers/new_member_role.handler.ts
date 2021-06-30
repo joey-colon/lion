@@ -1,13 +1,13 @@
 import { GuildMember, TextChannel } from 'discord.js';
 import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
-import { AGE_THRESHOLD, UserService } from '../../services/user.service';
-import { MessageService } from '../../services/message.service';
-import { GuildService } from '../../services/guild.service';
-import { ClientService } from '../../services/client.service';
+import { AGE_THRESHOLD, UserService } from '../../util/user';
+import { MessageService } from '../../util/message';
+import { GuildService } from '../../util/guild';
+import { LionClient } from '../../common/client.service';
 
 export class NewMemberRoleHandler implements IHandler {
-  constructor(public client: ClientService) {}
+  constructor(public client: LionClient) {}
 
   public async execute(member: GuildMember): Promise<void> {
     const unverifiedRole = GuildService.getRole(this.client, Constants.Roles.Unverifed)!;

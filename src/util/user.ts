@@ -1,7 +1,7 @@
 import { Client, GuildMember, Role } from 'discord.js';
 import moment from 'moment';
 import { Maybe } from '../common/types';
-import { GuildService } from './guild.service';
+import { GuildService } from './guild';
 
 const nonNumeric: RegExp = /^\d/g;
 export const AGE_THRESHOLD = moment.duration(2, 'days');

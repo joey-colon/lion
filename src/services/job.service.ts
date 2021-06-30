@@ -5,7 +5,7 @@ import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
-import { ClientService } from './client.service';
+import { LionClient } from '../common/client.service';
 
 export class JobService {
   public jobs: Job[] = [
@@ -18,7 +18,7 @@ export class JobService {
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
-  public register(job: Job, client: ClientService) {
+  public register(job: Job, client: LionClient) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }

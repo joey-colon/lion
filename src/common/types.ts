@@ -3,7 +3,7 @@
 import { AxiosResponse } from 'axios';
 import * as discord from 'discord.js';
 import { Document } from 'mongoose';
-import { ClientService } from '../services/client.service';
+import { LionClient } from './client.service';
 
 export interface IConfig {
   token: string;
@@ -42,7 +42,7 @@ export interface IHttpResponse extends AxiosResponse {}
 export type Voidable = Promise<void> | void;
 
 export interface IHandler {
-  readonly client: ClientService;
+  readonly client: LionClient;
   execute(...args: any[]): Voidable;
 }
 
@@ -79,7 +79,7 @@ export interface IClassRequest {
 export interface IJob {
   name: string;
   interval: number;
-  execute(container?: ClientService): void;
+  execute(container?: LionClient): void;
 }
 
 export interface IStore {

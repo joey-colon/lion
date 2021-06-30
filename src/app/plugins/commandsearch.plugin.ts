@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, IPlugin } from '../../common/types';
-import { MessageService } from '../../services/message.service';
+import { MessageService } from '../../util/message';
 
 export default class CommandSearchPlugin extends Plugin {
   public commandName: string = 'commands';

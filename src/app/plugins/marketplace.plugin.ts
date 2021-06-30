@@ -2,8 +2,8 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
-import { MessageService } from '../../services/message.service';
-import { GuildService } from '../../services/guild.service';
+import { MessageService } from '../../util/message';
+import { GuildService } from '../../util/guild';
 
 export default class MarketPlacePlugin extends Plugin {
   public commandName: string = 'marketplace';
