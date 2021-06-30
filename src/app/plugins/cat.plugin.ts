@@ -4,7 +4,7 @@ import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types'
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
 import { MessageService } from '../../util/message';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
 class Breed {

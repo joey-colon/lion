@@ -5,7 +5,7 @@ import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
 import { Plugin } from '../common/plugin';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 import winston from 'winston';
 import { StoreService } from '../services/store.service';
 

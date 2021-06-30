@@ -1,6 +1,6 @@
 import { Job } from '../../common/job';
 import { Poll } from '../../services/poll.service';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class PollJob extends Job {
   public interval: number = 1000 * 60 * 1; // Every minute

@@ -1,6 +1,6 @@
 import { IMessage } from '../common/types';
 import { MessageEmbed } from 'discord.js';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 
 export class Poll {
   start: Date;

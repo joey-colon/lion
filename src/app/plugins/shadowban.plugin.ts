@@ -3,7 +3,7 @@ import { IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { CategoryChannel, Collection, Guild, GuildChannel, User } from 'discord.js';
 import { GuildService } from '../../util/guild';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export default class ShadowBanPlugin extends Plugin {
   public commandName: string = 'shadowban';

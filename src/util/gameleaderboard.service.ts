@@ -3,7 +3,7 @@ import mongoose, { Document } from 'mongoose';
 import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 import { GuildService } from './guild';
 
 interface IUserOverallEntry {

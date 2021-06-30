@@ -3,7 +3,7 @@
 import { AxiosResponse } from 'axios';
 import * as discord from 'discord.js';
 import { Document } from 'mongoose';
-import { LionClient } from './client.service';
+import { LionClient } from './lion_client';
 
 export interface IConfig {
   token: string;

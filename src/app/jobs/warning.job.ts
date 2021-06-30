@@ -1,7 +1,7 @@
 import { CategoryChannel, TextChannel } from 'discord.js';
 import moment from 'moment';
 import { Job } from '../../common/job';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { GuildService } from '../../util/guild';
 
 export class WarningJob extends Job {

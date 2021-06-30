@@ -3,7 +3,7 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { GuildService } from '../../util/guild';
 import { Moderation } from '../../services/moderation.service';
 

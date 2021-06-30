@@ -2,7 +2,7 @@ import { ChannelType, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
 import { MessageService } from '../util/message';
 import { GuildService } from '../util/guild';
-import { LionClient } from './client.service';
+import { LionClient } from './lion_client';
 import { RoleService } from '../util/role';
 import { ChannelService } from '../util/channel';
 import winston from 'winston';

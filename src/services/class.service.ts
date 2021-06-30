@@ -21,7 +21,7 @@ import {
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildService } from '../util/guild';
 import levenshtein from 'js-levenshtein';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 export class ClassService {
   private _guild: Guild;
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();

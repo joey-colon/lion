@@ -1,7 +1,7 @@
 import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';

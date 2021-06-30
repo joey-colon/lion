@@ -4,7 +4,7 @@ import { IHandler, IServerInfo } from '../../common/types';
 import mongoose from 'mongoose';
 import { ServerInfoModel } from '../../schemas/server.schema';
 import { GuildService } from '../../util/guild';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class MemberCountHandler implements IHandler {
   private _MILESTONE_INTERVAL: number = 100;

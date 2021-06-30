@@ -1,7 +1,7 @@
 import { IHandler, IMessage } from '../../common/types';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
 export class RequireUrlHandler implements IHandler {

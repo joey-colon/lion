@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IHandler, IMessage } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { GuildService } from '../../util/guild';
 import { UserService } from '../../util/user';
 

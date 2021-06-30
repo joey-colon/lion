@@ -4,7 +4,7 @@ import Constants from '../common/constants';
 import { Plugin } from '../common/plugin';
 import { IPlugin, ICommandLookup, IPluginLookup } from '../common/types';
 import { PluginStateModel } from '../schemas/plugin.schema';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 import { GuildService } from '../util/guild';
 
 export interface IPluginState {

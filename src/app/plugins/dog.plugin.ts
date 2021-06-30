@@ -4,7 +4,7 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { MessageService } from '../../util/message';
 
 export default class DogPlugin extends Plugin {

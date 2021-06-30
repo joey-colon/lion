@@ -3,7 +3,7 @@ import { IHandler } from '../../common/types';
 import Constants from '../../common/constants';
 import { UserService } from '../../util/user';
 import { GuildService } from '../../util/guild';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
 export class WelcomeHandler implements IHandler {

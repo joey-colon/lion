@@ -1,6 +1,6 @@
 import { EmojiIdentifierResolvable } from 'discord.js';
 import { IHandler, IMessage, Maybe } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class LionPingHandler implements IHandler {
   private _reactEmoji: Maybe<EmojiIdentifierResolvable> = null;

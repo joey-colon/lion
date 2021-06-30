@@ -2,7 +2,7 @@ import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
 import WolframAlphaAPI from 'wolfram-alpha-api';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export default class WolframAlphaPlugin extends Plugin {
   public commandName: string = 'wolframalpha';

@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IHandler, IMessage, ClassType } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { MessageService } from '../../util/message';
 import { Moderation } from '../../services/moderation.service';
 import { UserService } from '../../util/user';

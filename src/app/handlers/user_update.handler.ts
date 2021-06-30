@@ -1,6 +1,6 @@
 import { GuildMember } from 'discord.js';
 import { IHandler } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { MessageService } from '../../util/message';
 
 export class UserUpdateHandler implements IHandler {

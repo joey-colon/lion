@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
 import { MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
 import moment from 'moment';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { ChannelService } from '../../util/channel';
 import winston from 'winston';
 

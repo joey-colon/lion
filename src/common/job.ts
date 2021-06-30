@@ -1,4 +1,4 @@
-import { LionClient } from './client.service';
+import { LionClient } from './lion_client';
 import { IJob } from './types';
 
 export abstract class Job implements IJob {

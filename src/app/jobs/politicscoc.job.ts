@@ -2,7 +2,7 @@ import { Job } from '../../common/job';
 import Constants from '../../common/constants';
 import { TextChannel } from 'discord.js';
 import { GuildService } from '../../util/guild';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
 export class PoliticsCoCReminder extends Job {

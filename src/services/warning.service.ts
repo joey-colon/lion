@@ -1,6 +1,6 @@
 import { CategoryChannel, GuildChannel, MessageEmbed, Snowflake, TextChannel } from 'discord.js';
 import { Maybe } from '../common/types';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 import { GuildService } from '../util/guild';
 import { Moderation } from './moderation.service';
 

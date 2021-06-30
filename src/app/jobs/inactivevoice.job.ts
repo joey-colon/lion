@@ -1,5 +1,5 @@
 import { Job } from '../../common/job';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class InactiveVoiceJob extends Job {
   public interval: number = 1000 * 60 * 10; // Every 10 mintues

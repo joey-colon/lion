@@ -4,7 +4,7 @@ import Constants from '../../common/constants';
 import { AGE_THRESHOLD, UserService } from '../../util/user';
 import { MessageService } from '../../util/message';
 import { GuildService } from '../../util/guild';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class NewMemberRoleHandler implements IHandler {
   constructor(public client: LionClient) {}

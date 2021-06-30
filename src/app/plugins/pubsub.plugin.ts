@@ -4,7 +4,7 @@ import { ChannelType, IHttpResponse, IMessage, Maybe } from '../../common/types'
 import { Guild, MessageEmbed } from 'discord.js';
 import * as moment from 'moment';
 import axios from 'axios';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import winston from 'winston';
 
 export default class PubSubPlugin extends Plugin {

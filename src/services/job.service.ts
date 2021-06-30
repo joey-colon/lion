@@ -5,7 +5,7 @@ import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
-import { LionClient } from '../common/client.service';
+import { LionClient } from '../common/lion_client';
 
 export class JobService {
   public jobs: Job[] = [

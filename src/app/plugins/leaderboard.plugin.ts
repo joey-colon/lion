@@ -2,7 +2,7 @@ import { User } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, Maybe } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 import { gameAliases, GameLeaderboardService, GameType } from '../../util/gameleaderboard.service';
 
 export default class LeaderboardPlugin extends Plugin {

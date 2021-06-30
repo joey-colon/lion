@@ -1,7 +1,7 @@
 import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IMessage, IHandler } from '../../common/types';
-import { LionClient } from '../../common/client.service';
+import { LionClient } from '../../common/lion_client';
 
 export class CountingHandler implements IHandler {
   private _NUMBER_REGEX: RegExp = /^\d+$/;
