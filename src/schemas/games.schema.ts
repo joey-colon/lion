@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { GameLeaderBoardDocument } from '../services/gameleaderboard.service';
+import { GameLeaderBoardDocument } from '../util/gameleaderboard.service';
 const { Schema } = mongoose;
 
 const gameUserSchema = new Schema({

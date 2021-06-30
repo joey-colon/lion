@@ -4,7 +4,7 @@ import winston from 'winston';
 import { Maybe } from '../common/types';
 import { C4LeaderboardModel, TTTLeaderboardModel } from '../schemas/games.schema';
 import { LionClient } from '../common/client.service';
-import { GuildService } from '../util/guild';
+import { GuildService } from './guild';
 
 interface IUserOverallEntry {
   player: User;

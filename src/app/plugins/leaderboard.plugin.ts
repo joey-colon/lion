@@ -3,7 +3,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, Maybe } from '../../common/types';
 import { LionClient } from '../../common/client.service';
-import { gameAliases, GameLeaderboardService, GameType } from '../../services/gameleaderboard.service';
+import { gameAliases, GameLeaderboardService, GameType } from '../../util/gameleaderboard.service';
 
 export default class LeaderboardPlugin extends Plugin {
   public commandName: string = 'leaderboard';

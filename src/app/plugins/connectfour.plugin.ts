@@ -4,7 +4,7 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage, Maybe } from '../../common/types';
 import { LionClient } from '../../common/client.service';
-import { GameLeaderboardService, GameResult, GameType } from '../../services/gameleaderboard.service';
+import { GameLeaderboardService, GameResult, GameType } from '../../util/gameleaderboard.service';
 
 export default class ConnectFourPlugin extends Plugin {
   public commandName: string = 'connect4';
