@@ -8,10 +8,6 @@ export class WarningJob extends Job {
   public interval: number = moment.duration(5, 'minutes').asMilliseconds();
   public name: string = 'Warning Job';
 
-  constructor() {
-    super();
-  }
-
   public execute(client: LionClient) {
     // Cache the messages in the warning channels so we can listen
     const warnCat = GuildManager.getChannel(client, 'warnings') as CategoryChannel;

@@ -5,10 +5,6 @@ export class InactiveVoiceJob extends Job {
   public interval: number = 1000 * 60 * 10; // Every 10 mintues
   public name: string = 'Inactive Voice';
 
-  constructor() {
-    super();
-  }
-
   public async execute(client: LionClient) {
     const vcs = client.classes.getVoiceChannels();
 

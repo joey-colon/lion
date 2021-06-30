@@ -8,11 +8,7 @@ import winston from 'winston';
 export class PoliticsCoCReminder extends Job {
   public interval: number = 1000 * 60 * 30; // every 30 minutes
   public name: string = 'politics_coc_reminder';
-
-  constructor() {
-    super();
-  }
-
+  
   public execute(client: LionClient) {
     try {
       winston.debug(`Starting ${this.name} job`);

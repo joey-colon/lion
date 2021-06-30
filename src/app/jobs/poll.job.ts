@@ -6,10 +6,6 @@ export class PollJob extends Job {
   public interval: number = 1000 * 60 * 1; // Every minute
   public name: string = 'Poll';
 
-  constructor() {
-    super();
-  }
-
   public execute(client: LionClient) {
     const polls: Map<number, Poll> = client.polls.getPolls();
     const now = new Date().getTime();
