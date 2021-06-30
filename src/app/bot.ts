@@ -1,6 +1,4 @@
-import { Kernel } from '../bootstrap/kernel';
 import fs from 'fs';
-import { Listener } from './listener';
 import { Store } from '../common/store';
 import express, { Express } from 'express';
 import Server from 'http';
@@ -10,8 +8,6 @@ import winston from 'winston';
 import { StoreService } from '../services/store.service';
 
 export class Bot {
-  private _kernel!: Kernel;
-  private _listener!: Listener;
   private _webServer!: Express;
   public client: LionClient;
   private _webServerInstance: Server.Server | undefined;
@@ -22,8 +18,6 @@ export class Bot {
   }
 
   private _initialise(): void {
-    this._kernel = new Kernel();
-    this._listener = new Listener(this.client);
     this._webServer = express();
   }
 
