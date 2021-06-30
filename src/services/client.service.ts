@@ -8,7 +8,7 @@ import { WarningService } from './warning.service';
 
 export class ClientService extends Client {
   private _startDate: Date;
-  public readonly classes: ClassService;
+  public classes!: ClassService;
   public readonly pluginService: PluginService;
   public readonly polls: PollService;
   public readonly jobService: JobService;
@@ -19,12 +19,15 @@ export class ClientService extends Client {
     super();
     this.login(process.env.DISCORD_TOKEN);
     this._startDate = new Date();
-    this.classes = new ClassService(this);
     this.pluginService = new PluginService();
     this.polls = new PollService(this);
     this.jobService = new JobService();
     this.moderation = new ModService(this);
     this.warnings = new WarningService(this);
+  }
+
+  initClasses() {
+    this.classes = new ClassService(this);
   }
 
   public getStartDate() {

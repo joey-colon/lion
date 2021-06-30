@@ -40,6 +40,8 @@ export class Listener {
     this.client.on('ready', async () => {
       winston.info(`Loaded ${this.client.jobService.size()} jobs...`);
 
+      this.client.initClasses();
+
       // Load in plugin states.
       await this.client.pluginService.initPluginState(this.client);
 
