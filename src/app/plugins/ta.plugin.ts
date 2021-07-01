@@ -5,7 +5,6 @@ import { Guild, GuildMember, Snowflake, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { ClassTAModel } from '../../schemas/class.schema';
 import { UserService } from '../../util/user';
-import { GuildManager } from '../../util/guild';
 
 export default class TaPlugin extends Plugin {
   public commandName: string = 'ta';
@@ -119,7 +118,7 @@ export default class TaPlugin extends Plugin {
       })).filter((e) => e.chanID === chan.id);
 
     return fromCollection.reduce((acc: GuildMember[], entry: ITAEntry) => {
-      const member = GuildManager.getGuild(this.client).members.cache.get(entry.userID);
+      const member = this.guild.members.cache.get(entry.userID);
       if (member) {
         acc.push(member);
       }

@@ -165,8 +165,7 @@ export default class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
-    const guild = GuildManager.getGuild(msg.client);
-    const isInServer = Boolean(guild.members.cache.get(user.id));
+    const isInServer = Boolean(this.guild.members.cache.get(user.id));
     if (!isInServer) {
       return;
     }
@@ -179,9 +178,7 @@ export default class MarketPlacePlugin extends Plugin {
       return this._LINK_PREFIX;
     }
 
-    const guild = GuildManager.getGuild(this.client);
-
-    const guildID = guild.id;
+    const guildID = this.guild.id;
     const chanID = GuildManager.getChannel(this.client, Constants.Channels.Public.BuySellTrade)!.id;
     this._LINK_PREFIX = `https://discord.com/channels/${guildID}/${chanID}/`;
     return this._LINK_PREFIX;

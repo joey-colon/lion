@@ -29,7 +29,7 @@ export default class ListRolesPlugin extends Plugin {
     }
 
     const chatbotRole = GuildManager.getRole(this.client, 'Chatbot')!;
-    GuildManager.getGuild(this.client)
+    this.guild
       .roles.cache.sort((a: Role, b: Role) =>
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       )

@@ -6,8 +6,9 @@ import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
 import { LionClient } from '../common/lion_client';
+import { Service } from '../common/service';
 
-export class JobService {
+export class JobService extends Service {
   public jobs: Job[] = [
     new ExampleJob(),
     new UnBanJob(),

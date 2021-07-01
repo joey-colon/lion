@@ -15,12 +15,22 @@ export class LionClient extends Client {
   public moderation!: ModService;
   public warnings!: WarningService;
 
-  init() {
+  constructor() {
+    super();
     this.classes = new ClassService(this);
     this.pluginService = new PluginService();
     this.polls = new PollService(this);
-    this.jobService = new JobService();
-    this.moderation = new ModService(this);
+    this.jobService = new JobService(this);
     this.warnings = new WarningService(this);
+    this.moderation = new ModService(this, this.warnings);
+  }
+
+  override async login(token: string | undefined): Promise<string> {
+    const retval = await super.login(token);
+
+    // Once we're done we'll fetch the classes.
+    this.classes.fetchClasses();
+
+    return retval;
   }
 }

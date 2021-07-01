@@ -1,5 +1,4 @@
 import {
-  Guild,
   GuildChannel,
   Permissions,
   CategoryChannel,
@@ -21,9 +20,9 @@ import {
 import { ClassVoiceChan } from '../app/plugins/createclassvoice.plugin';
 import { GuildManager } from '../util/guild';
 import levenshtein from 'js-levenshtein';
-import { LionClient } from '../common/lion_client';
-export class ClassService {
-  private _guild: Guild;
+import { Service } from '../common/service';
+
+export class ClassService extends Service {
   private _channels = new Map<ClassType, Map<string, GuildChannel>>();
 
   // When someone is allowed in a channel the bitfield value is the sum of their permissionOverwrites
@@ -33,11 +32,6 @@ export class ClassService {
 
   private _classVoiceChans: Map<string, ClassVoiceChan> = new Map();
   private _CLASS_VC_CAT: Maybe<CategoryChannel> = null;
-
-  constructor(private _clientService: LionClient) {
-    this._guild = GuildManager.getGuild(_clientService);
-    this._addClasses();
-  }
 
   public getClasses(classType: ClassType): Map<string, GuildChannel> {
     if (classType === ClassType.ALL) {
@@ -190,16 +184,16 @@ export class ClassService {
 
   public updateClasses(): void {
     this._channels.clear();
-    this._addClasses();
+    this.fetchClasses();
   }
 
-  private _addClasses(): void {
-    GuildManager.getGuild(this._clientService).channels.cache.forEach((channel) => {
+  public fetchClasses(): void {
+    GuildManager.getGuild(this.client)?.channels.cache.forEach((channel) => {
       if (!channel.parentID) {
         return;
       }
 
-      const category = this._guild.channels.cache.get(channel.parentID);
+      const category = this.guild.channels.cache.get(channel.parentID);
 
       if (category?.name.toLowerCase().includes('classes')) {
         for (const classType of Object.keys(ClassType).filter((k) => k !== ClassType.ALL)) {
@@ -331,11 +325,11 @@ export class ClassService {
     }
 
     if (!this._CLASS_VC_CAT) {
-      this._CLASS_VC_CAT = GuildManager.getChannel(this._clientService, 'class voice') as CategoryChannel;
+      this._CLASS_VC_CAT = GuildManager.getChannel(this.client, 'class voice') as CategoryChannel;
     }
 
-    const everyoneRole = GuildManager.getRole(this._clientService, '@everyone');
-    return this._guild.channels.create(classChan.name, {
+    const everyoneRole = GuildManager.getRole(this.client, '@everyone');
+    return GuildManager.getGuild(this.client).channels.create(classChan.name, {
       type: 'voice',
       parent: this._CLASS_VC_CAT,
       permissionOverwrites: [

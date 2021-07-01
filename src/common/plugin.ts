@@ -31,6 +31,10 @@ export abstract class Plugin implements IPlugin {
   public isActive: boolean = true;
 
   public client: LionClient;
+  
+  public get guild() {
+    return GuildManager.getGuild(this.client);
+  }
 
   // Typical defaults for existing commands.
   public usableInDM = false;

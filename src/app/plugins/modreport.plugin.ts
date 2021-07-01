@@ -1,10 +1,7 @@
-import { Guild } from 'discord.js';
 import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { LionClient } from '../../common/lion_client';
-import { GuildManager } from '../../util/guild';
 import { Moderation } from '../../services/moderation.service';
 
 export default class ModReportPlugin extends Plugin {
@@ -17,13 +14,6 @@ export default class ModReportPlugin extends Plugin {
   public pluginChannelName: string = Constants.Channels.Staff.UserOffenses;
   public commandPattern: RegExp = /(add|list|warn|ban|full)\s+([^#]+#\d{4})\s*(.*)/;
   
-  private _guild: Guild;
-
-  constructor(client: LionClient) {
-    super(client);
-    this._guild = GuildManager.getGuild(client);
-  }
-
   public async execute(message: IMessage, args: string[]) {
     const match_arr = args.join(' ').match(this.commandPattern);
 
@@ -53,14 +43,14 @@ export default class ModReportPlugin extends Plugin {
   }
 
   private async _createReport(message: IMessage, user_handle: string, description?: string) {
-    const id = await Moderation.Helpers.resolveUser(this._guild, user_handle);
+    const id = await Moderation.Helpers.resolveUser(this.guild, user_handle);
     
     if (!id) {
       return;
     }
 
     const rep: Moderation.Report = new Moderation.Report(
-      this._guild,
+      this.guild,
       id,
       description,
       message.attachments.map((e) => e.url)
@@ -81,7 +71,7 @@ export default class ModReportPlugin extends Plugin {
   private async _handleListReport(message: IMessage, user_handle: string) {
     message.reply(
       await this.client.moderation.getModerationSummary(
-        this._guild,
+        this.guild,
         user_handle
       )
     );
@@ -92,7 +82,7 @@ export default class ModReportPlugin extends Plugin {
       await message.reply(`Full Report for ${user_handle}`, {
         files: [
           await this.client.moderation.getFullReport(
-            this._guild,
+            this.guild,
             user_handle
           ),
         ],

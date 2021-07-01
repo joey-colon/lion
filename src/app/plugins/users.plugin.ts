@@ -1,7 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, IUser } from '../../common/types';
 import Constants from '../../common/constants';
-import { GuildManager } from '../../util/guild';
 
 export default class UserCountPlugin extends Plugin {
   public commandName: string = 'users';
@@ -13,7 +12,7 @@ export default class UserCountPlugin extends Plugin {
 
   public execute(message: IMessage) {
     const members = this.client.users.cache.array();
-    const totalMembers = GuildManager.getGuild(this.client).memberCount;
+    const totalMembers = this.guild.memberCount;
     const onlineMembers = members.filter((member: IUser) => {
       return member.presence.status !== 'offline';
     }).length;

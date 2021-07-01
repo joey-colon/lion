@@ -4,7 +4,6 @@ import { Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 import axios from 'axios';
-import { GuildManager } from '../../util/guild';
 import winston from 'winston';
 
 interface IRoleInfo {
@@ -49,8 +48,8 @@ export default class ManageRolesPlugin extends Plugin {
   }
 
   private async _dumpRolesInfo(message: IMessage) {
-    const highestRole = GuildManager.getGuild(this.client).roles.highest;
-    const rolesInfo = GuildManager.getGuild(this.client)
+    const highestRole = this.guild.roles.highest;
+    const rolesInfo = this.guild
       .roles.cache.reduce((acc: IRoleInfo[], curRole) => {
         // only include roles that the bot can actually update.
         if (curRole.comparePositionTo(highestRole) < 0 && curRole.name !== '@everyone') {
@@ -88,7 +87,7 @@ export default class ManageRolesPlugin extends Plugin {
 
   private async _updateRole(roleInfo: IRoleInfo): Promise<IRoleUpdateResult | undefined> {
     try {
-      const role = GuildManager.getGuild(this.client).roles.cache.get(roleInfo.id);
+      const role = this.guild.roles.cache.get(roleInfo.id);
 
       if (!role) {
         return;

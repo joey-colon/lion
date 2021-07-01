@@ -3,7 +3,6 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { GuildManager } from '../../util/guild';
 
 export default class SlowModePlugin extends Plugin {
   public commandName: string = 'slowmode';
@@ -36,7 +35,7 @@ export default class SlowModePlugin extends Plugin {
     channels
       .reduce((acc: TextChannel[], cur: string) => {
         const id = cur.replace(/\D/g, '');
-        const channel = GuildManager.getGuild(this.client).channels.cache.get(id) as TextChannel;
+        const channel = this.guild.channels.cache.get(id) as TextChannel;
 
         channel && acc.push(channel);
 

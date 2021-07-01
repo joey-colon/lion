@@ -3,7 +3,6 @@ import winston from 'winston';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IMessage } from '../../common/types';
-import { GuildManager } from '../../util/guild';
 
 export default class ChanBanPlugin extends Plugin {
   public commandName: string = 'chanban';
@@ -32,16 +31,15 @@ export default class ChanBanPlugin extends Plugin {
 
     const [, username, channels] = match;
 
-    const guild = GuildManager.getGuild(this.client);
     const channel_objs =
       channels
         .match(this._channelIDRegex)
-        ?.map((c) => guild.channels.cache.get(c.replace(/\D/g, '')))
+        ?.map((c) => this.guild.channels.cache.get(c.replace(/\D/g, '')))
         .filter((c) => c !== undefined) ?? [];
 
     try {
       const successfully_banned_channels = await this.client.moderation.channelBan(
-        guild,
+        this.guild,
         username,
         channel_objs as GuildChannel[]
       );

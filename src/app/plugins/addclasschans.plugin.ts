@@ -2,7 +2,6 @@ import { Plugin } from '../../common/plugin';
 import { IMessage, ChannelType, ClassType } from '../../common/types';
 import { GuildChannel, MessageEmbed, TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
-import { GuildManager } from '../../util/guild';
 import winston from 'winston';
 
 interface IChannel {
@@ -65,20 +64,18 @@ export default class AddClassChannelsPlugin extends Plugin {
       return;
     }
 
-    const guild = GuildManager.getGuild(message.client);
-
     const getCat = async (category: string) => {
       category = category.toLowerCase();
-      const ret = GuildManager.getGuild(this.client)
+      const ret = this.guild
         .channels.cache.find((c) => c.name.toLowerCase() === category && c.type === 'category');
       if (!ret) {
         
         try {
-          return await guild.channels.create(category, {
+          return await this.guild.channels.create(category, {
             type: 'category',
             permissionOverwrites: [
               {
-                id: guild.id,
+                id: this.guild.id,
                 deny: ['VIEW_CHANNEL'],
               },
             ],
@@ -104,13 +101,13 @@ export default class AddClassChannelsPlugin extends Plugin {
     for (const chan of this._STATE) {
       // create channel
       try {
-        await guild
+        await this.guild
           .channels.create(chan.name, {
             type: 'text',
             parent: patternToCategory.get(chan.category),
             permissionOverwrites: [
               {
-                id: guild.id,
+                id: this.guild.id,
                 deny: ['VIEW_CHANNEL'],
               },
             ],

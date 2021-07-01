@@ -8,7 +8,8 @@ import * as fs from 'fs';
 import { WarningService } from './warning.service';
 import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 import winston from 'winston';
-import { GuildManager } from '../util/guild';
+// import { GuildManager } from '../util/guild';
+import { Service } from '../common/service';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -103,13 +104,10 @@ export namespace Moderation {
   }
 }
 
-export class ModService {
-  private _warningService: WarningService;
-
-  constructor(
-    private _clientService: LionClient
-  ) {
-    this._warningService = new WarningService(_clientService);
+export class ModService extends Service {
+  
+  constructor(client: LionClient, private _warningService: WarningService) {
+    super(client);
   }
 
   // Files a report but does not warn the subject.
@@ -124,11 +122,11 @@ export class ModService {
 
   public async fileAnonReportWithTicketId(ticket_id: string, message: IMessage) {
     // overwrite with our user to protect reporter
-    message.author = this._clientService.user as User;
+    message.author = this.client.user as User;
 
     winston.info(`Filing report with ticket_id ${ticket_id}`);
 
-    const userOffenseChan = GuildManager.getGuild(this._clientService)!
+    const userOffenseChan = this.guild
       .channels.cache.find((c) => c.name === Constants.Channels.Staff.UserOffenses);
 
     if (!userOffenseChan) {
@@ -160,7 +158,7 @@ export class ModService {
     }
 
     const [, user_id] = decoded;
-    const user = GuildManager.getGuild(this._clientService).members.cache.get(user_id);
+    const user = this.guild.members.cache.get(user_id);
 
     if (!user) {
       winston.error(
@@ -201,7 +199,7 @@ export class ModService {
 
   // Files a report and warns the subject.
   public async fileWarning(report: Moderation.Report): Promise<string> {
-    const member = GuildManager.getGuild(this._clientService).members.cache.get(report.user);
+    const member = this.guild.members.cache.get(report.user);
     if (member?.user.bot) {
       return 'You cannot warn a bot.';
     }
@@ -261,10 +259,8 @@ export class ModService {
       reportId: reportResult,
     });
 
-    const guild = GuildManager.getGuild(this._clientService);
-
     try {
-      await guild
+      await this.guild
         .members.cache.get(report.user)
         ?.send(
           `You have been banned for one week for ${report.description ??
@@ -275,7 +271,7 @@ export class ModService {
     }
 
     try {
-      await guild.members.ban(report.user, { reason: report.description });
+      await this.guild.members.ban(report.user, { reason: report.description });
     } catch (e) {
       return `Issue occurred trying to ban user. ${e}`;
     }
@@ -441,7 +437,6 @@ export class ModService {
       return;
     }
 
-    const guild = GuildManager.getGuild(this._clientService);
     const bulk = ModerationBanModel.collection.initializeUnorderedBulkOp();
 
     const sevenDaysAgo = new Date();
@@ -450,14 +445,14 @@ export class ModService {
     try {
       const unbans = await ModerationBanModel
         .find({
-          guild: guild.id,
+          guild: this.guild.id,
           active: true,
           date: { $lte: new Date(sevenDaysAgo.toISOString()) },
         })
         .map(async (ban) => {
           winston.info('Unbanning user ' + ban.user);
           try {
-            await guild.members.unban(ban.user);
+            await this.guild.members.unban(ban.user);
           } catch (e) {
             winston.error('Failed to unban user ' + ban.user, e);
           }
