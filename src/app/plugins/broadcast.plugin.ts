@@ -1,9 +1,10 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
+import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment, ThreadChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
-export class BroadcastPlugin extends Plugin {
+export default class BroadcastPlugin extends Plugin {
+  public commandName: string = 'broadcast';
   public name: string = 'Broadcast';
   public description: string = 'Sends an announcement to all class channels';
   public usage: string =
@@ -12,7 +13,7 @@ export class BroadcastPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Admin;
   public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
-  private _CHANS_TO_SEND: GuildChannel[] = [];
+  private _CHANS_TO_SEND: (GuildChannel | ThreadChannel)[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
@@ -80,13 +81,13 @@ export class BroadcastPlugin extends Plugin {
     const embeds = this._createAnnouncement();
     await message.reply(
       `Sending Announcement to \`${this._CHANS_TO_SEND.length}\` classes... ` +
-        `I will let you know it has finished`
+        'I will let you know it has finished'
     );
 
     const [announcementEmbed, attachments] = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send({ embed: announcementEmbed });
+        await (chan as TextChannel).send({ embeds: [announcementEmbed] });
         if (attachments) {
           await (chan as TextChannel).send({ files: attachments });
         }
@@ -124,10 +125,10 @@ export class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply({ embed: this._createAnnouncement()[0] });
+    message.reply({ embeds: (this._createAnnouncement() as MessageEmbed[]) });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
-        `Respond with \`confirm\` or \`cancel\``
+        'Respond with `confirm` or `cancel`'
     );
   }
 

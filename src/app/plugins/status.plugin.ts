@@ -1,9 +1,9 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
-import { PLUGIN_STORE_SIZE } from '../../bootstrap/plugin.loader';
 import { MessageEmbed } from 'discord.js';
 
-export class StatusPlugin extends Plugin {
+export default class StatusPlugin extends Plugin {
+  public commandName: string = 'status';
   public name: string = 'Status';
   public description: string = 'Gets info about Lion';
   public usage: string = 'status';
@@ -18,18 +18,18 @@ export class StatusPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const latestCommit = await Promise.resolve(this._getLatestCommit());
     if (!latestCommit) {
       await message.reply('Something happened while getting status');
       return;
     }
 
-    const numPlugins = PLUGIN_STORE_SIZE;
+    const numPlugins = Object.values(this.container.pluginService.plugins).length;
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPlugins, uptime);
-    message.reply(embed);
+    message.reply({ embeds: [embed] });
   }
 
   private _creatEmbed(latestCommit: ICommitData, numPluigins: number, startDate: string) {

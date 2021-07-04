@@ -1,9 +1,11 @@
-import { ChannelType, IContainer, IMessage, IPlugin, RoleType } from './types';
+import { ChannelType, IContainer, IMessage, IPlugin, RoleType, Voidable } from './types';
 import Constants from '../common/constants';
-import { CommandInteraction, GuildManager, GuildMember } from 'discord.js';
+import { CommandInteraction, GuildMember } from 'discord.js';
 
 export abstract class Plugin implements IPlugin {
   public abstract container: IContainer;
+
+  public abstract get commandName(): string;
 
   public abstract get name(): string;
 
@@ -19,9 +21,13 @@ export abstract class Plugin implements IPlugin {
 
   public pluginChannelName?: string;
 
+  public pluginCategoryName?: string;
+
   public commandPattern?: RegExp;
 
   private _numChannelsShown: number = 3;
+
+  public isActive: boolean = true;
 
   // Typical defaults for existing commands.
   public usableInDM = false;
@@ -35,77 +41,77 @@ export abstract class Plugin implements IPlugin {
     return this.commandPattern.test(args.join(' '));
   }
 
-  public hasPermission(message: IMessage | CommandInteraction): boolean {
-    const channelName = this.container.messageService.getChannel(message).name;
+  public hasPermission(message: IMessage | CommandInteraction): true | string {
+    const channel = this.container.messageService.getChannel(message);
+    const channelName = channel.name;
+    const categoryName = channel.parent?.name.toLowerCase();
     if (typeof this.pluginChannelName === 'string' && this.pluginChannelName !== channelName) {
       const id = this.container.guildService.getChannel(this.pluginChannelName).id;
-      message.reply(`Please use this command in the <#${id}> channel.`);
-      return false;
+      return `Please use this command in the <#${id}> channel.`;
+    }
+
+    if (this.pluginCategoryName && this.pluginCategoryName.toLowerCase() !== categoryName) {
+      return `Please use this command in the \`${this.pluginCategoryName}\` category.`;
     }
 
     const member = message.member as GuildMember;
     if (!member) {
-      message.reply('Could not resolve you to a member.');
-      return false;
+      return 'Could not resolve you to a member.';
     }
 
-    const minRoleToRun = this.minRoleToRun || 0;
+    const minRoleToRun = this.minRoleToRun ?? 0;
     const hasRolePerms = this.container.roleService.hasPermission(member, minRoleToRun);
     if (!hasRolePerms) {
-      message.reply(`You must have a higher role to run this command.`);
-      return false;
+      return 'You must have a higher role to run this command.';
     }
 
-    const response = this.container.channelService.hasPermission(channelName, this.permission);
-    if (!response) {
-      const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
-
-      if (this.permission.toString() === 'Private') {
-        message.reply(
-          `${baseReply} This is primarily the class channels, and any channels we haven't defined.`
-        );
-        return response;
-      }
-
-      // If permission is all, get all categories and flatten to a 1D array
-      const channels =
-        this.permission === ChannelType.All
-          ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
-          : Object.values(Constants.Channels[this.permission]);
-
-      const totalChannels = channels.length;
-      channels.splice(this._numChannelsShown);
-
-      try {
-        const id = channels
-          .filter((channel) => {
-            return this.container.guildService
-              .getChannel(channel)
-              .permissionsFor(message.member as GuildMember || '')
-              ?.has('VIEW_CHANNEL');
-          })
-          .map((room) => this.container.guildService.getChannel(room).id);
-
-        if (id.length === 0) {
-          message.reply(`${baseReply} There are no permanent channels of this type.`);
-          return response;
-        }
-
-        if (id.length === 1) {
-          message.reply(`${baseReply} <#${id[0]}> is the only channel with this type.`);
-          return response;
-        }
-
-        message.reply(
-          baseReply +
-            `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
-            `${id.map((chan) => `<#${chan}>`).join(',\n')}.`
-        );
-      } catch (err) {
-        this._errorGen(channels, err);
-      }
+    const isPermitted = this.container.channelService.hasPermission(channelName, this.permission);
+    if (isPermitted) {
+      return true;
     }
-    return response;
+
+    const baseReply = `Please use this command in a \`${this.permission}\` channel.`;
+
+    if (this.permission.toString() === 'Private') {
+      return `${baseReply} This is primarily the class channels, and any channels we haven't defined.`;
+    }
+
+    // If permission is all, get all categories and flatten to a 1D array
+    const channels =
+      this.permission === ChannelType.All
+        ? Object.values(Constants.Channels).flatMap((el) => Object.values(el))
+        : Object.values(Constants.Channels[this.permission]);
+
+    const totalChannels = channels.length;
+    channels.splice(this._numChannelsShown);
+
+    try {
+      const id = channels
+        .filter((channel) => {
+          return this.container.guildService
+            .getChannel(channel)
+            .permissionsFor(message.member as GuildMember)
+            ?.has('VIEW_CHANNEL');
+        })
+        .map((room) => this.container.guildService.getChannel(room).id);
+
+      if (id.length === 0) {
+        return `${baseReply} There are no permanent channels of this type.`;
+      }
+
+      if (id.length === 1) {
+        return `${baseReply} <#${id[0]}> is the only channel with this type.`;
+      }
+
+      return (
+        baseReply +
+        `\nHere are ${id.length} of the ${totalChannels} supported channel(s): \n` +
+        `${id.map((chan) => `<#${chan}>`).join(',\n')}.`
+      );
+    } catch (err) {
+      this._errorGen(channels, err);
+    }
+    return 'There was an error trying to process your request.';
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,5 +123,5 @@ export abstract class Plugin implements IPlugin {
     );
   }
 
-  public abstract execute(message: IMessage, args?: string[]): Promise<void>;
+  public abstract execute(message: IMessage, args?: string[]): Voidable;
 }

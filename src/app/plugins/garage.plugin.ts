@@ -13,7 +13,8 @@ class Garage {
   public percent_avail: number = 0;
 }
 
-export class GaragePlugin extends Plugin {
+export default class GaragePlugin extends Plugin {
+  public commandName: string = 'garage';
   public name: string = 'Garage Plugin';
   public description: string = 'Gets garage status.';
   public usage: string = 'garage <which garage>';
@@ -95,7 +96,7 @@ export class GaragePlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
+  public async execute(message: IMessage) {
     const garages: Garage[] = await this._getGarages();
     let message_response: string = '';
 

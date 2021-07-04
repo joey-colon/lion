@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Role } from 'discord.js';
 
-export class ListRolesPlugin extends Plugin {
+export default class ListRolesPlugin extends Plugin {
+  public commandName: string = 'listroles';
   public name: string = 'Roles Plugin';
   public description: string = 'Lists all available roles.';
   public usage: string = 'listroles';
@@ -15,7 +16,7 @@ export class ListRolesPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args?: string[]) {
+  public async execute(message: IMessage) {
     let res = '```\n';
 
     const member = message.member;
@@ -39,13 +40,13 @@ export class ListRolesPlugin extends Plugin {
       .filter((role) => role.position < chatbotRole.position) // Make sure the user can add it
       .map((role) => {
         if (mp.get(role.name.toLowerCase())) {
-          res += `-- `;
+          res += '-- ';
         } else {
-          res += `   `;
+          res += '   ';
         }
         res += `${role.name.toLowerCase()}\n`;
       });
     res += '```';
-    await this.container.messageService.attemptDMUser(message, res);
+    await this.container.messageService.attemptDMUser(message, { content: res });
   }
 }

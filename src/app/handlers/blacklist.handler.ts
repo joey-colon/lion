@@ -2,7 +2,6 @@ import { TextChannel } from 'discord.js';
 import Constants from '../../common/constants';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 import { Moderation } from '../../services/moderation.service';
-import { MemberUtils } from '../util/member.util';
 
 interface ILinkLabel {
   regex: RegExp;
@@ -21,7 +20,7 @@ export class BlacklistHandler implements IHandler {
   private _whitelistedChannels = new Set([Constants.Channels.Public.Clubs]);
   constructor(public container: IContainer) {}
 
-  public async execute(message: IMessage): Promise<void> {
+  public execute(message: IMessage): void {
     const channel = message.channel as TextChannel;
     const member = message.member;
     if (!member) {
@@ -29,7 +28,7 @@ export class BlacklistHandler implements IHandler {
     }
 
     // Whitelist moderators
-    if (MemberUtils.hasRole(member, 'Moderator')) {
+    if (this.container.userService.hasRole(member, 'Moderator')) {
       return;
     }
 

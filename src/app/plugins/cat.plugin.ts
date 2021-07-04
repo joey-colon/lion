@@ -8,7 +8,8 @@ class Breed {
   public id: string = '';
 }
 
-export class CatPlugin extends Plugin {
+export default class CatPlugin extends Plugin {
+  public commandName: string = 'cat';
   public name: string = 'Cat Plugin';
   public description: string = 'Generates pictures of cats.';
   public usage: string = 'cat <breed (optional)>';
@@ -45,7 +46,10 @@ export class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await message.reply((await this._getListEmbed()) || 'Failed to load breeds.');
+      const embed = this._getListEmbed();
+      const msg = embed ? { embed } : { content: 'Failed to load breeds.' };
+
+      await message.reply(msg);
       return;
     }
 
@@ -53,7 +57,7 @@ export class CatPlugin extends Plugin {
 
     let searchCom = '';
 
-    // checks if their was a bread was a breed, then if that breed is recognised
+    // checks if their was a bread was a breed, then if that breed is recognized
     const breedEntry = this._breeds.find((breed) => breed.name === breedIn);
 
     if (breedEntry !== undefined) {
@@ -65,19 +69,21 @@ export class CatPlugin extends Plugin {
 
     this.container.loggerService.debug(searchCom);
 
-    // recieves the according info and posts, or derps
+    // receives the according info and posts
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
         message.reply({
           content: '',
           files: [response.data[0].url],
+          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
+          // the 'name' property doesn't exist in v13.
         });
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private async _getListEmbed() {
+  private _getListEmbed() {
     if (this._embedBreeds) {
       return this._embedBreeds;
     }

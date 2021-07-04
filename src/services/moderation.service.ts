@@ -1,6 +1,7 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
+import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User, MessageOptions } from 'discord.js';
+import mongoose, { Document } from 'mongoose';
 import { StorageService } from './storage.service';
-import { Collection, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { ClientService } from './client.service';
 import { GuildService } from './guild.service';
 import { LoggerService } from './logger.service';
@@ -8,7 +9,7 @@ import { IMessage, Maybe } from '../common/types';
 import Constants from '../common/constants';
 import * as fs from 'fs';
 import { WarningService } from './warning.service';
-import Environment from '../environment';
+import { ModerationBanModel, ModerationReportModel, ModerationWarningModel } from '../schemas/moderation.schema';
 
 export namespace Moderation {
   export namespace Helpers {
@@ -33,7 +34,7 @@ export namespace Moderation {
       const attachments =
         (report.attachments && report.attachments.length && report.attachments.join(', ')) ||
         'no attachment';
-      return `\`${report.description || 'no description'}\`: [${attachments}] at ${new Date(
+      return `\`${report.description ?? 'no description'}\`: [${attachments}] at ${new Date(
         report.timeStr
       ).toLocaleString('en-US')}`;
     }
@@ -48,6 +49,8 @@ export namespace Moderation {
     _id?: ObjectId;
   }
 
+  export type ModerationReportDocument = IModerationReport & Document;
+
   export interface IModerationBan {
     user: Snowflake;
     guild: Snowflake;
@@ -58,6 +61,8 @@ export namespace Moderation {
     _id: ObjectId;
   }
 
+  export type ModerationBanDocument = IModerationBan & Document;
+
   export interface IModerationWarning {
     user: Snowflake;
     guild: Snowflake;
@@ -65,6 +70,8 @@ export namespace Moderation {
     reportId?: ObjectId;
     _id: ObjectId;
   }
+
+  export type ModerationWarningDocument = IModerationWarning & Document;
 
   export class Report implements IModerationReport {
     public guild: Snowflake;
@@ -85,7 +92,7 @@ export namespace Moderation {
       const has_atta = this.attachments && this.attachments.length;
 
       if (!has_desc && !has_atta) {
-        throw new Error(`Need either a description or attachment(s).`);
+        throw new Error('Need either a description or attachment(s).');
       }
 
       this.timeStr = new Date().toISOString();
@@ -112,7 +119,7 @@ export class ModService {
     if (res) {
       return `Added report: ${Moderation.Helpers.serialiseReportForMessage(report)}`;
     } else {
-      return `Could not insert report.`;
+      return 'Could not insert report.';
     }
   }
 
@@ -152,7 +159,7 @@ export class ModService {
       return undefined;
     }
 
-    const [_, user_id] = decoded;
+    const [, user_id] = decoded;
     const user = this._guildService.get().members.cache.get(user_id as `${bigint}`);
 
     if (!user) {
@@ -188,7 +195,7 @@ export class ModService {
       return undefined;
     }
 
-    const [_, message_id, user_id] = match_report_id;
+    const [, message_id, user_id] = match_report_id;
 
     return [message_id, user_id];
   }
@@ -202,30 +209,29 @@ export class ModService {
 
     const fileReportResult: ObjectId | undefined = await this._insertReport(report);
 
-    const warnings = (await this._storageService.getCollections()).modwarnings;
-
+    const warningsThreshold = +(process.env.WARNINGS_THRESH ?? 3);
     const recentWarnings =
-      (await warnings
-        ?.find({ user: report.user, guild: report.guild })
+      (await ModerationWarningModel
+        .find({ user: report.user, guild: report.guild })
         .sort({ date: -1 })
-        .limit(Environment.WarningsThresh)
-        .toArray()) || [];
+        .limit(warningsThreshold)) ?? [];
 
     const beginningOfWarningRange = new Date();
-    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - Environment.WarningsRange);
+    const warningRange = +(process.env.WARNINGS_RANGE ?? 14);
+    beginningOfWarningRange.setDate(beginningOfWarningRange.getDate() - warningRange);
 
     const shouldEscalateToBan =
-      recentWarnings.length >= Environment.WarningsThresh &&
+      recentWarnings.length >= warningsThreshold &&
       recentWarnings.reduce((acc, x) => acc && x.date >= beginningOfWarningRange, true);
 
     if (shouldEscalateToBan) {
       return (
-        `User has been warned too many times. Escalate to ban.\n` +
+        'User has been warned too many times. Escalate to ban.\n' +
         `Result: ${await this._fileBan(report, fileReportResult)}`
       );
     }
 
-    await warnings?.insertOne({
+    await ModerationWarningModel.create({
       user: report.user,
       guild: report.guild,
       date: new Date(),
@@ -244,17 +250,15 @@ export class ModService {
   // Files a report and bans the subject.
   private async _fileBan(report: Moderation.Report, reportResult: ObjectId | undefined) {
     if (await this._isUserCurrentlyBanned(report.guild, report.user)) {
-      return `User is already banned.`;
+      return 'User is already banned.';
     }
 
-    const bans = (await this._storageService.getCollections())?.modbans;
-
-    await bans?.insertOne({
+    await ModerationBanModel.create({
       guild: report.guild,
       user: report.user,
       date: new Date(),
       active: true,
-      reason: report.description || '<none>',
+      reason: report.description ?? '<none>',
       reportId: reportResult,
     });
 
@@ -263,7 +267,7 @@ export class ModService {
         .get()
         .members.cache.get(report.user)
         ?.send(
-          `You have been banned for one week for ${report.description ||
+          `You have been banned for one week for ${report.description ??
             report.attachments?.join(',')}`
         );
     } catch (e) {
@@ -276,7 +280,7 @@ export class ModService {
       return `Issue occurred trying to ban user. ${e}`;
     }
 
-    return `Banned User`;
+    return 'Banned User';
   }
 
   // Produces a report summary.
@@ -284,31 +288,27 @@ export class ModService {
   public async getModerationSummary(
     guild: Guild,
     username: string
-  ): Promise<MessageEmbed | string> {
-    const collections = await this._storageService.getCollections();
+  ): Promise<MessageOptions> {
     const id = await Moderation.Helpers.resolveUser(guild, username);
 
     if (!id) {
-      return 'No such user found.';
+      return { content: 'No such user found.' };
     }
 
-    const modreports = collections?.modreports;
-    const modwarnings = collections?.modwarnings;
-
-    const reports = await modreports?.find({ guild: guild.id, user: id });
-    const warnings = await modwarnings?.find({ guild: guild.id, user: id });
-    const banStatus = await this._getBanStatus(collections, guild, id);
+    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
+    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
+    const banStatus = await this._getBanStatus(guild, id);
 
     const mostRecentWarning =
-      (await warnings
-        ?.sort({ date: -1 })
-        .limit(1)
-        .toArray()) || [];
+      (await ModerationWarningModel
+        .find({})
+        .sort({ date: -1 })
+        .limit(1)) ?? [];
 
     let lastWarning = '<none>';
     if (mostRecentWarning.length) {
       const _id = mostRecentWarning[0].reportId;
-      const rep = await modreports?.findOne({ _id });
+      const rep = await ModerationReportModel.findOne({ _id });
       if (rep) {
         lastWarning = Moderation.Helpers.serialiseReportForMessage(rep);
       }
@@ -318,30 +318,26 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', (await reports?.count())!.toString());
-    reply.addField('Total Warnings', (await warnings?.count())!.toString());
+    reply.addField('Total Reports', reports?.length.toString());
+    reply.addField('Total Warnings', warnings?.length.toString());
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
 
-    return reply;
+    return { embeds: [reply] };
   }
 
   public async getFullReport(guild: Guild, user_handle: string) {
-    const collections = await this._storageService.getCollections();
     const id = await Moderation.Helpers.resolveUser(guild, user_handle);
     if (!id) {
       throw new Error('User not found');
     }
 
-    const modreports = collections?.modreports;
-    const modwarnings = collections?.modwarnings;
-
-    const reports = await modreports?.find({ guild: guild.id, user: id }).toArray();
-    const warnings = await modwarnings?.find({ guild: guild.id, user: id }).toArray();
-    const banStatus = await this._getBanStatus(collections, guild, id);
+    const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
+    const warnings = await ModerationWarningModel.find({ guild: guild.id, user: id });
+    const banStatus = await this._getBanStatus(guild, id);
 
     if (!reports) {
       throw new Error('Couldnt get reports');
@@ -386,16 +382,11 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(collections: ICollection, guild: Guild, id: `${bigint}`): Promise<string> {
-    const modbans = collections?.modbans;
-    const bans = await modbans?.find({ guild: guild.id, user: id });
-
-    const mostRecentBan =
-      (await bans
-        ?.sort({ date: -1 })
-        .limit(1)
-        .toArray()) || [];
-
+  private async _getBanStatus(guild: Guild, id: Snowflake): Promise<string> {
+    const mostRecentBan = await ModerationBanModel.find({ guild: guild.id, user: id })
+      .sort({ date: -1 })
+      .limit(1) ?? [];
+    
     if (mostRecentBan.length && mostRecentBan[0].active) {
       return `Banned since ${mostRecentBan[0].date.toLocaleString()}`;
     }
@@ -413,7 +404,7 @@ export class ModService {
   private _serializeReportForTable(report: Moderation.IModerationReport): string {
     const serializedReport = `Reported on: ${
       report.timeStr
-    }<br />Description: ${report.description || 'No Description'}`;
+    }<br />Description: ${report.description ?? 'No Description'}`;
     if (!report.attachments?.length) {
       return serializedReport;
     }
@@ -445,21 +436,19 @@ export class ModService {
   public async checkForScheduledUnBans() {
     this._loggerService.info('Running UnBan');
 
-    const modbans = (await this._storageService.getCollections())?.modbans;
-
-    if (!modbans) {
+    if (!mongoose.connection.readyState) {
       this._loggerService.info('No modbans DB. Skipping this run of checkForScheduledUnBans');
       return;
     }
 
     const guild = this._guildService.get();
-    const bulk = modbans.initializeUnorderedBulkOp();
+    const bulk = ModerationBanModel.collection.initializeUnorderedBulkOp();
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     try {
-      const unbans = await modbans
+      const unbans = await ModerationBanModel
         .find({
           guild: guild.id,
           active: true,
@@ -473,8 +462,7 @@ export class ModService {
             this._loggerService.error('Failed to unban user ' + ban.user, e);
           }
           bulk.find({ _id: ban._id }).updateOne({ $set: { active: false } });
-        })
-        .toArray();
+        });
 
       await Promise.all(unbans);
 
@@ -515,7 +503,8 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .createOverwrite(id, {
+          .permissionOverwrites
+          .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })
@@ -550,21 +539,11 @@ export class ModService {
   }
 
   private async _insertReport(report: Moderation.Report): Promise<ObjectId | undefined> {
-    return (await (await this._storageService.getCollections())?.modreports?.insertOne(report))
-      ?.ops[0]._id;
+    return (await ModerationReportModel.create(report))?.id;
   }
 
   private async _isUserCurrentlyBanned(guild: Snowflake, user: Snowflake) {
-    const bans = (await this._storageService.getCollections())?.modbans;
-
-    const userBan = await bans?.findOne({ guild, user, active: true });
-
+    const userBan = await ModerationBanModel.findOne({ guild, user, active: true });
     return userBan?.active;
   }
-}
-
-interface ICollection {
-  modreports?: Collection<Moderation.IModerationReport>;
-  modbans?: Collection<Moderation.IModerationBan>;
-  modwarnings?: Collection<Moderation.IModerationWarning>;
 }

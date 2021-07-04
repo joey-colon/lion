@@ -9,7 +9,8 @@ import {
   VoiceChannel,
 } from 'discord.js';
 
-export class CreateClassVoice extends Plugin {
+export default class CreateClassVoice extends Plugin {
+  public commandName: string = 'createclassvoice';
   public name: string = 'Create Class Voice';
   public description: string = 'Creates a temporary voice channel for a class';
   public usage: string = 'createclassvoice';
@@ -20,7 +21,7 @@ export class CreateClassVoice extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const chan = message.channel as TextChannel;
     const voiceChan = await this.container.classService.createVoiceChan(message.author, chan);
     if (!voiceChan) {
@@ -28,12 +29,12 @@ export class CreateClassVoice extends Plugin {
       return;
     }
 
-    const inviteMessage = await message.channel.send(this._createEmbed());
+    const inviteMessage = await message.channel.send({ embeds: [this._createEmbed()] });
     await inviteMessage.react('🎙');
 
     const collector = inviteMessage.createReactionCollector(
-      (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
       {
+        filter: (reaction: MessageReaction, user: User) => user.id !== inviteMessage.author.id, // Only run if its not the bot putting reacts
         time: 1000 * 60 * 60 * 24,
       } // Listen for 24 hours
     );
@@ -43,7 +44,8 @@ export class CreateClassVoice extends Plugin {
       if (!user) {
         return;
       }
-      await voiceChan.createOverwrite(user.id, { VIEW_CHANNEL: true });
+      
+      await voiceChan.permissionOverwrites.create(user.id, { VIEW_CHANNEL: true });
     });
 
     this.container.classService.updateClassVoice(
@@ -55,7 +57,7 @@ export class CreateClassVoice extends Plugin {
   private _createEmbed(): MessageEmbed {
     const embed = new MessageEmbed();
     embed.setTitle('Voice Channel Created');
-    embed.setDescription(`React with 🎙 to gain access to the voice channel`);
+    embed.setDescription('React with 🎙 to gain access to the voice channel');
     return embed;
   }
 }

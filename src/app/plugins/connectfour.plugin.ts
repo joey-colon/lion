@@ -1,18 +1,18 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export class ConnectFourPlugin extends Plugin {
+export default class ConnectFourPlugin extends Plugin {
+  public commandName: string = 'connect4';
   public name: string = 'Connect Four';
   public description: string = 'Play connect four with a friend';
   public usage: string = 'connectfour <user tag>';
   public pluginAlias = ['connect4', 'connect', 'c4'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
-  public commandPattern: RegExp = /@[^#]+/;
 
   public static MOVES: string[] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣'];
 
@@ -20,23 +20,26 @@ export class ConnectFourPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const guild = message.guild;
     if (!guild) {
       return;
     }
 
-    const combinedArgs = args.join(' ');
-    // A tagged user comes in as the form '<@!userid>'.
-    // The substring strips off the characters not relavent to a userid.
-    const opponent = combinedArgs.substring(3, combinedArgs.length - 1);
-    const oppMember = guild.members.cache.filter((m) => m.user.id === opponent).first();
-    if (!oppMember) {
+    const opponent = message.mentions.members?.first();
+
+    if (!opponent) {
       await message.reply('Could not find a user with that name.');
       return;
     }
 
-    await this._createGame(message, oppMember);
+    // Make sure we're not playing against ourselves.
+    if (opponent.id === message.member?.id) {
+      await message.reply("Sorry but you can't play against yourself.");
+      return;
+    }
+
+    await this._createGame(message, opponent);
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {
@@ -45,16 +48,18 @@ export class ConnectFourPlugin extends Plugin {
       oppMember.user,
       message.mentions.members?.first()?.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(ConnectFourPlugin.MOVES.map((emoji) => msg.react(emoji)));
+
+    const filter = (react: MessageReaction, user: User) =>
+    // Only target our game emojis and no bot reactions
+      ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id;
 
     // Listen on reactions
     const collector = msg.createReactionCollector(
-      (react: MessageReaction, user: User) =>
-        // Only target our game emojis and no bot reactions
-        ConnectFourPlugin.MOVES.includes(react.emoji.name!) && user.id !== msg.author.id,
       {
-        time: moment.duration(10, 'minutes').asMilliseconds(),
+        filter,
+        time: ms('10m'),
       }
     );
     game.collector = collector;
@@ -76,6 +81,7 @@ export class ConnectFourPlugin extends Plugin {
       }
 
       await react.users.remove(user);
+      collector.resetTimer();
     });
 
     collector.on('end', async () => {
@@ -141,8 +147,6 @@ class ConnectFourGame {
 
   private _playingLion: boolean;
   private _aiDepth = 4;
-  // Difficulty should be given in [1, 100];
-  private _aiDifficulty = 50;
 
   private _winner: Maybe<number> = null;
   private _tie: boolean = false;
@@ -157,7 +161,7 @@ class ConnectFourGame {
 
     this._playingLion = playingLion;
 
-    this._board = Array.from(Array(this._rows), (_) => Array(this._cols).fill(0));
+    this._board = Array.from(Array(this._rows), () => Array(this._cols).fill(0));
   }
 
   public getCurrentPlayer() {
@@ -204,38 +208,39 @@ class ConnectFourGame {
     return;
   }
 
-  // Turn on the beast.
   private _lionMove() {
+    const bestCol = this._getBestMove();
+    this._dropPiece(bestCol);
+  }
+
+  // Turn on the beast.
+  private _getBestMove(): number {
     const moves: { col: number; val: number }[] = [];
     for (let col = 0; col < this._cols; col++) {
+      // Make move.
       if (!this._dropPiece(col)) {
         continue;
       }
 
-      moves.push({ col, val: this._evaluate(this._currentPlayer * -1, 0) });
+      // Evaluate.
+      moves.push({ col, val: this._minimax(this._currentPlayer * -1, 0) });
+      // Backtrack.
       this._removeTopPiece(col);
     }
 
     // Sort moves from best to worst.
     moves.sort((a, b) => b.val - a.val);
-    const bestValue = moves[0].val;
-    const moveOptions = moves.filter(
-      (move) => Math.abs(bestValue - move.val) < this._getNormalizedDifficulty()
-    );
-    const randomMoveCol = moveOptions[Math.floor(Math.random() * moveOptions.length)].col;
-    this._dropPiece(randomMoveCol);
+
+    // Calculate all moves with equal value, and return one.
+    const bestMoves = moves.filter((move) => move.val === moves[0].val);
+    const randomMove = Math.floor(Math.random() * bestMoves.length);
+    return bestMoves[randomMove].col;
   }
 
-  // We want the highest difficulty to allow for the least error.
-  private _getNormalizedDifficulty() {
-    return 1 / this._aiDifficulty;
-  }
-
-  // Evaluate the strength of the current board state,
-  // as it relates to Player 2's success.
-  // Return value is the average of all possible moves from this position
-  // Each move is evaluated on a score of [-4, 4]
-  private _evaluate(currentPlayer: number, depth: number) {
+  // Minimax! To read more check out https://en.wikipedia.org/wiki/Minimax
+  // Note: -1 is minimizing, 1 is maximizing
+  // Value of a move is rated from [-4, -4];
+  private _minimax(currentPlayer: number, depth: number) {
     // If we have reached a win state, then the LAST move won.
     if (this._checkWin()) {
       return -4 * currentPlayer;
@@ -244,28 +249,31 @@ class ConnectFourGame {
       return 0;
     }
     // If we reached depth, then evaluate the board.
-    // We use a very simple evaluation: -(longest player one chain)
+    // We use a very simple evaluation: longest player 1 chain (ai) - longest player -1 chain (player)
     // This causes Lion to simply try to minimize Player 1's success,
     // While our _checkWin case takes over when it's time to clinch victory.
     if (depth === this._aiDepth) {
-      return this._longestChainOnBoard(1) - this._longestChainOnBoard(-1);
+      return -currentPlayer * (this._longestChainOnBoard(1) - this._longestChainOnBoard(-1));
     }
 
     const moves: number[] = [];
     for (let col = 0; col < this._cols; col++) {
+      // Make move.
       if (!this._dropPiece(col, currentPlayer)) {
         continue;
       }
 
-      moves.push(this._evaluate(this._currentPlayer * -1, depth + 1));
+      // Evaluate (recursive).
+      moves.push(this._minimax(currentPlayer * -1, depth + 1));
+      // Backtrack.
       this._removeTopPiece(col);
     }
 
-    return this._arraySum(moves) / moves.length;
-  }
-
-  private _arraySum(array: number[]): number {
-    return array.reduce((acc, val) => (acc += val));
+    // Maximizing player wants the *highest* value
+    if (currentPlayer === 1) {
+      return Math.max(...moves);
+    }
+    return Math.min(...moves);
   }
 
   private _dropPiece(col: number, currentPlayer?: number): boolean {
@@ -301,32 +309,32 @@ class ConnectFourGame {
     return row;
   }
 
-  private _longestChainOnBoard(currentPlayer?: number): number {
+  private _longestChainOnBoard(player?: number): number {
     return this._board.reduce(
       (longestChainOnBoard, rowObj, row) =>
         rowObj.reduce(
           (longestChainStartingInRow, _, col) =>
-            Math.max(
-              longestChainStartingInRow,
-              this._longestChainAtLocation(row, col, currentPlayer)
-            ),
+            Math.max(longestChainStartingInRow, this._longestChainAtLocation(row, col, player)),
           longestChainOnBoard
         ),
       0
     );
   }
 
-  private _longestChainAtLocation(row: number, col: number, currentPlayer?: number): number {
+  private _longestChainAtLocation(row: number, col: number, player?: number): number {
     const chains: number[] = Array(8).fill(0);
-
-    // For all locations in chain of length four
-    for (let distance = 0; distance < 4; distance++) {
-      // For each possible chain direction
-      for (let direction = 0; direction < 8; direction++) {
+    const owner = this._board[row][col];
+    if (owner === 0) {
+      return 0;
+    }
+    // For each possible chain direction
+    for (let direction = 0; direction < 8; direction++) {
+      // For all locations in chain of length four
+      for (let distance = 0; distance < 4; distance++) {
         const newRow: number = row + this._searchDY[direction] * distance;
         const newCol: number = col + this._searchDX[direction] * distance;
 
-        if (this._validAndOwned(newRow, newCol, currentPlayer)) {
+        if (this._validAndOwned(newRow, newCol, player ? player : owner)) {
           chains[direction]++;
         }
       }
@@ -337,13 +345,13 @@ class ConnectFourGame {
   }
 
   // Returns if a postion is valid and owned by the current player.
-  private _validAndOwned(row: number, col: number, currentPlayer?: number): boolean {
+  private _validAndOwned(row: number, col: number, player: number): boolean {
     return (
       row >= 0 &&
       row < this._rows &&
       col >= 0 &&
       col < this._cols &&
-      this._board[row][col] === (currentPlayer ? currentPlayer : this._currentPlayer)
+      this._board[row][col] === player
     );
   }
 
@@ -358,7 +366,7 @@ class ConnectFourGame {
     } else {
       this._changeTurn();
     }
-    await msg.edit(this.showBoard());
+    await msg.edit({ embeds: [this.showBoard()] });
   }
 
   private _changeTurn(): void {

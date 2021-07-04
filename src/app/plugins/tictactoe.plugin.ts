@@ -1,18 +1,18 @@
 import { GuildMember, MessageEmbed, MessageReaction, ReactionCollector, User } from 'discord.js';
-import moment from 'moment';
+import ms from 'ms';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { GameResult, GameType } from '../../services/gameleaderboard.service';
 
-export class TicTacToe extends Plugin {
+export default class TicTacToe extends Plugin {
+  public commandName: string = 'tictactoe';
   public name: string = 'Tic Tac Toe';
   public description: string = 'Tic Tac Toe';
   public usage: string = 'tictactoe @<user>';
   public pluginAlias = ['ttt'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Games;
-  public commandPattern: RegExp = /<@!?(\d+)>/;
 
   private _moves: string[] = ['1️⃣', '2️⃣', '3️⃣', '🔄'];
 
@@ -20,27 +20,25 @@ export class TicTacToe extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const guild = message.guild;
     if (!guild) {
       return;
     }
 
-    const match = args.join(' ').match(this.commandPattern);
-    if (!match) {
+    const opponent = message.mentions.members?.first();
+    if (!opponent) {
       await message.reply('Could not find a user with that name.');
       return;
     }
 
-    // User ID is the the first group of match
-    const [, uID] = match;
-    const oppMember = guild.members.cache.get(uID as `${bigint}`);
-    if (!oppMember) {
-      await message.reply('Could not find a user with that name.');
+    // Make sure we're not playing against ourselves...
+    if (opponent.id === message.member?.id) {
+      await message.reply("Sorry, you can't play against yourself.");
       return;
     }
 
-    await this._createGame(message, oppMember);
+    await this._createGame(message, opponent);
   }
 
   private async _createGame(message: IMessage, oppMember: GuildMember) {
@@ -49,16 +47,16 @@ export class TicTacToe extends Plugin {
       oppMember.user,
       oppMember.id === this.container.clientService.user?.id
     );
-    const msg = await message.reply(game.showBoard());
+    const msg = await message.reply({ embeds: [game.showBoard()] });
     await Promise.all(this._moves.map((emoji) => msg.react(emoji)));
 
     // Create reactions for making moves
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        // Assert one of target emojis and not the bot
-        this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
       {
-        time: moment.duration(10, 'minutes').asMilliseconds(),
+        filter: (reaction: MessageReaction, user: User) =>
+        // Assert one of target emojis and not the bot
+          this._moves.includes(reaction.emoji.name!) && user.id !== msg.author.id,
+        time: ms('10m'),
       }
     );
     game.collector = collector;
@@ -78,7 +76,7 @@ export class TicTacToe extends Plugin {
       // If its the undo button
       if (index === this._moves.indexOf('🔄')) {
         game.reset();
-        await msg.edit(game.showBoard());
+        await msg.edit({ embeds: [game.showBoard()] });
         await reaction.users.remove(user);
         return;
       }
@@ -86,6 +84,7 @@ export class TicTacToe extends Plugin {
       // Apply the move
       await game.choose(index, msg);
       await reaction.users.remove(user);
+      collector.resetTimer();
     });
 
     collector.on('end', async () => {
@@ -205,7 +204,7 @@ class TTTGame {
     if (this._choosing === Choosing.Column) {
       this._col = index;
       this._choosing = Choosing.Row;
-      await msg.edit(this.showBoard());
+      await msg.edit({ embeds: [this.showBoard()] });
       return;
     }
 
@@ -236,7 +235,7 @@ class TTTGame {
       this._flipTurn();
     }
 
-    await msg.edit(this.showBoard());
+    await msg.edit({ embeds: [this.showBoard()] });
 
     if (this._gameOver) {
       this.collector?.stop();
@@ -383,7 +382,7 @@ class TTTGame {
       embed.setDescription(
         `${boardAsString}\n**` +
           `${this._winner === -1 ? this._playerA.username : this._playerB.username}` +
-          `** is the winner!`
+          '** is the winner!'
       );
 
       return embed;

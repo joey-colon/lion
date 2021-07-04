@@ -1,6 +1,5 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { IContainer, IHandler } from '../../common/types';
-import { MemberUtils } from '../util/member.util';
 import Constants from '../../common/constants';
 
 export class WelcomeHandler implements IHandler {
@@ -9,11 +8,11 @@ export class WelcomeHandler implements IHandler {
   constructor(public container: IContainer) {}
 
   public async execute(member: GuildMember): Promise<void> {
-    const shouldUnverify = MemberUtils.shouldUnverify(member);
+    const shouldUnverify = this.container.userService.shouldUnverify(member);
     const embed = this._createEmbed(shouldUnverify);
     await member
-      .send(embed)
-      .catch((err) =>
+      .send({ embeds: [embed] })
+      .catch(() =>
         this.container.loggerService.debug(`Couldn't DM new user ${member.user.tag}`)
       );
   }
@@ -35,13 +34,13 @@ export class WelcomeHandler implements IHandler {
       false
     );
     embed.addField(
-      `Getting started`,
+      'Getting started',
       `To join a custom channel for your CS, ECE, or IT class, go to \`#${Constants.Channels.Bot.BotChannel}\`\
       and type \`!register <className_professor>\`\nWhile you are there, try \`!help\` to see what I can do!`,
       false
     );
     embed.addField(
-      `Read our Code of Conduct`,
+      'Read our Code of Conduct',
       `Please read our \`#${Constants.Channels.Info.CodeOfConduct}\` and react to the message to show you\
       acknowledge our guidelines.`,
       true

@@ -41,7 +41,7 @@ export class PollService {
 
   public createResultEmbed(poll: Poll): MessageEmbed {
     const embed = new MessageEmbed();
-    embed.setTitle(`Poll has concluded!`);
+    embed.setTitle('Poll has concluded!');
     embed.setColor('#fcb103');
     embed.setThumbnail(this._POLL_THUMBNAIL);
     embed.setDescription(poll.question);
@@ -52,8 +52,8 @@ export class PollService {
       }
 
       const ret = {
-        count: cur.count || 0,
-        emoji: cur.emoji.name!,
+        count: cur.count ?? 0,
+        emoji: cur.emoji.name ?? '',
       };
       acc.push(ret);
       return acc;

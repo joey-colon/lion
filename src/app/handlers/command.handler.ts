@@ -1,8 +1,8 @@
 import * as types from '../../common/types';
 import Constants from '../../common/constants';
 import levenshtein from 'js-levenshtein';
-import { CommandInteraction, MessageEmbed, MessageReaction, TextChannel, User } from 'discord.js';
-import moment from 'moment';
+import { CommandInteraction, MessageEmbed, MessageReaction, User } from 'discord.js';
+import ms from 'ms';
 import ISlashPlugin from '../../common/slash';
 
 type CommandResolvable = {
@@ -16,7 +16,7 @@ type CommandResolvable = {
   message: CommandInteraction;
   plugin: types.IPlugin;
   isDM: boolean;
-}
+};
 
 export class CommandHandler implements types.IHandler {
   private _CHECK_EMOTE = '✅';
@@ -27,19 +27,14 @@ export class CommandHandler implements types.IHandler {
   public async execute(message: types.IMessage | CommandInteraction): Promise<void> {
     const plugins = this.container.pluginService.plugins;
     const aliases = this.container.pluginService.aliases;
-
-    let plugin;
-
-    if (message instanceof CommandInteraction) {
-      plugin = plugins[aliases[message.commandName]];
-    } else {
-
-    }
-
-    
     const isDM = !message.guild;
 
     if (!(message instanceof CommandInteraction)) {
+
+      if (message.mentions?.everyone) {
+        message.reply('You cannot use a plugin, while pinging everyone.');
+        return;
+      }
 
       const command = this.build(message.content)!;
       const plugin = plugins[aliases[command!.name]];
@@ -66,7 +61,7 @@ export class CommandHandler implements types.IHandler {
         plugin,
         message,
         isDM,
-      })
+      });
     }
   }
 
@@ -74,23 +69,9 @@ export class CommandHandler implements types.IHandler {
     const { plugins, aliases } = this.container.pluginService;
     const allNames = Array.from(Object.keys(this.container.pluginService.aliases));
 
-    const currentChannelName = (message.channel as TextChannel).name.toLowerCase();
     const validCommandsInChannel = allNames.filter((name) => {
       const plugin = plugins[aliases[name]];
-
-      // Check channel type
-      const permLevel = plugin.permission;
-      if (permLevel !== this.container.channelService.getChannelType(currentChannelName)) {
-        return false;
-      }
-
-      // If there is a specific channel, make sure it's this one
-      const pluginChannel = plugin.pluginChannelName;
-      if (!pluginChannel) {
-        return true;
-      }
-
-      return pluginChannel.toLowerCase() === currentChannelName;
+      return plugin.hasPermission(message) === true;
     });
 
     const [mostLikelyCommand] = validCommandsInChannel.sort(
@@ -100,26 +81,31 @@ export class CommandHandler implements types.IHandler {
     const embed = new MessageEmbed();
     embed.setTitle('Command not found');
     embed.setDescription(
-      `Did you mean \`!` +
+      'Did you mean `!`' +
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 
-    const msg = await message.channel.send(embed);
+    const msg = await message.channel.send({ embeds: [embed] });
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 
+    // Only run if its not the bot putting reacts
+    const filter = (reaction: MessageReaction, user: User) =>
+      [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name ?? '') &&
+      user.id !== msg.author.id;
+
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name!) &&
-        user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
-        time: moment.duration(3, 'seconds').asMilliseconds(),
+        filter,
+        time: ms('10m'),
       } // Listen for 10 Minutes
     );
 
     // Delete message after collector is finished
     collector.on('end', () => {
-      msg.delete();
+      if (msg.deletable) {
+        msg.delete();
+      }
     });
 
     collector.on('collect', async (reaction: MessageReaction) => {
@@ -164,13 +150,15 @@ export class CommandHandler implements types.IHandler {
 
   private async _attemptRunPlugin(commandData: CommandResolvable) {
 
-    const { isDM, plugin, message, type } = commandData;
+    const { isDM, plugin, message } = commandData;
 
     if ((isDM && !plugin.usableInDM) || (!isDM && !plugin.usableInGuild)) {
       return;
     }
 
-    if (!isDM && !plugin.hasPermission(message)) {
+    const permissionResponse = plugin.hasPermission(message);
+    if (!isDM && permissionResponse !== true) {
+      message.reply({ content: `${permissionResponse}` });
       return;
     }
 
@@ -187,6 +175,11 @@ export class CommandHandler implements types.IHandler {
       user = message.user.tag;
     } else {
       user = message.author.tag;
+    }
+
+    if (!plugin.isActive) {
+      await message.reply('This plugin has been deactivated.');
+      return;
     }
 
     const pEvent: types.IPluginEvent = {
@@ -208,7 +201,7 @@ export class CommandHandler implements types.IHandler {
 
       // This should never happen.
       if (!types.isSlashCommand(plugin)) {
-        throw new Error('Cannot invoke slash command on a non-slash-command plugin.')
+        throw new Error('Cannot invoke slash command on a non-slash-command plugin.');
       }
 
       await (plugin as unknown as ISlashPlugin).run(message as CommandInteraction);

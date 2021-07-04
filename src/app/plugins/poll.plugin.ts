@@ -2,7 +2,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { Poll } from '../../services/poll.service';
 
-export class PollPlugin extends Plugin {
+export default class PollPlugin extends Plugin {
+  public commandName: string = 'poll';
   public name: string = 'Poll';
   public description: string = 'creates a poll';
   public usage: string = 'poll <time> <question> \\n <answer1> \\n <answer2>...';
@@ -41,7 +42,7 @@ export class PollPlugin extends Plugin {
     );
 
     // Send embed and react will all possible answers
-    await message.channel.send(embed).then(async (sentMsg) => {
+    await message.channel.send({ embeds: [embed] }).then(async (sentMsg) => {
       const promises = answers.map((_, i) => sentMsg.react(NUM_TO_EMOJI[i]));
       await Promise.all(promises);
 

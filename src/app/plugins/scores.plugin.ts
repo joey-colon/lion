@@ -2,9 +2,10 @@ import { Plugin } from '../../common/plugin';
 import Constants from '../../common/constants';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 import { MessageEmbed } from 'discord.js';
-import * as espn from './__generated__/espn';
+import * as espn from '../__generated__/espn';
 
-export class ScoresPlugin extends Plugin {
+export default class ScoresPlugin extends Plugin {
+  public commandName: string = 'scores';
   public name: string = 'NCAA Scores Plugin';
   public description: string = 'Gets score of a sport game.';
   public usage: string = 'scores <sport> <team origin>; ex scores NCAA UCF';
@@ -50,7 +51,7 @@ export class ScoresPlugin extends Plugin {
       visitorTeam.location.toLowerCase() === teamName ||
       visitorTeam.abbreviation.toLowerCase() === teamName ||
       visitorTeam.name.toLowerCase() === teamName;
-    await message.channel.send(this._createEmbed(game, isVisitor));
+    await message.channel.send({ embeds: [this._createEmbed(game, isVisitor)] });
   }
 
   private async _getGame(url: string, teamName: string): Promise<espn.IEvent> {
@@ -115,7 +116,7 @@ export class ScoresPlugin extends Plugin {
     const probability = game.competitions[0].situation?.lastPlay.probability;
     if (probability) {
       const chances = [probability.awayWinPercentage, probability.homeWinPercentage];
-      embed.addField(`Win chance:`, `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
+      embed.addField('Win chance:', `${this._decimalToPercent(chances[isVisitor ? 0 : 1])}%`, true);
     }
 
     const leaders = game.competitions[0].leaders;

@@ -1,7 +1,7 @@
-import { ApplicationCommandData, GuildMember, Interaction, Message, PartialGuildMember, PartialMessage } from 'discord.js';
+import { GuildMember, Interaction, Message, MessageEmbed, PartialGuildMember, PartialMessage, TextChannel } from 'discord.js';
+import Constants from '../common/constants';
 import ISlashPlugin from '../common/slash';
-import { IContainer, IHandler, IMessage, isSlashCommand } from '../common/types';
-import Environment from '../environment';
+import { IContainer, IHandler, IMessage, isSlashCommand, Mode } from '../common/types';
 import { CommandHandler } from './handlers/command.handler';
 
 export class Listener {
@@ -12,6 +12,7 @@ export class Listener {
   private _userUpdateHandlers: IHandler[] = [];
   private _memberAddHandlers: IHandler[] = [];
   private _reactionHandlers: IHandler[] = [];
+  private _memberRemoveHandlers: IHandler[] = [];
 
   constructor(public container: IContainer) {
     this._initializeHandlers();
@@ -50,20 +51,42 @@ export class Listener {
       // can take over an hour to propogate.
       if (process.env.NODE_ENV === 'development') {
 
-        if (!Environment.GuildID) {
-          throw new Error("You need to set the GUILD_ID in your .env file!");
+        if (!process.env.GUILD_ID) {
+          throw new Error('You need to set the GUILD_ID in your .env file!');
         }
         
-        await this.container.clientService.guilds.cache.get(Environment.GuildID)?.commands.set(commands);
+        await this.container.clientService.guilds.cache.get(process.env.GUILD_ID)?.commands.set(commands);
       } else {
         await this.container.clientService.application?.commands.set(commands);
       }
       
+      // Load in plugin states.
+      await this.container.pluginService.initPluginState(this.container);
+
       this.container.loggerService.info('Lion is now running!');
+
+      // Don't need to send this when testing
+      // This is useful for knowing when the bot crashed in production and restarts
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === Mode.Development) {
+        return;
+      }
+
+      const notificationChannel = this.container.guildService.getChannel(
+        Constants.Channels.Public.LionProjectGithub
+      ) as TextChannel;
+
+      const embed = new MessageEmbed();
+      embed
+        .setThumbnail(Constants.LionPFP)
+        .setTitle('Lion is now running')
+        .setColor('#ffca06')
+        .setTimestamp(new Date());
+
+      notificationChannel.send({ embeds: [embed] });
     });
 
     // Used to handle slash commands.
-    this.container.clientService.on('interaction', async (interaction: Interaction) => {
+    this.container.clientService.on('interaction', (interaction: Interaction) => {
       // If it's not a command, we don't care.
       if (!interaction.isCommand()) { return; }
 
@@ -72,7 +95,7 @@ export class Listener {
         if (handler instanceof CommandHandler) {
           handler.execute(interaction);
         }
-      })
+      });
     });
 
     this.container.clientService.on('message', async (message: IMessage) => {
@@ -99,9 +122,16 @@ export class Listener {
     this.container.clientService.on('guildMemberAdd', async (member: GuildMember) => {
       await this._executeHandlers(this._memberAddHandlers, member);
     });
+
+    this.container.clientService.on(
+      'guildMemberRemove',
+      async (member: GuildMember | PartialGuildMember) => {
+        await this._executeHandlers(this._memberRemoveHandlers, member as GuildMember);
+      }
+    );
   }
 
-  private async _handleCommand(interaction: Interaction) {
+  private _handleCommand(interaction: Interaction) {
     if (interaction.user.bot) {
       return;
     }
@@ -112,7 +142,11 @@ export class Listener {
   }
 
   private async _handleMessageOrMessageUpdate(message: IMessage, isMessageUpdate: boolean) {
-    if (message.author.bot) {
+    if (message.author.id === this.container.clientService.user?.id) {
+      return;
+    }
+
+    if (message.webhookID) {
       return;
     }
 
@@ -187,6 +221,10 @@ export class Listener {
       this._memberAddHandlers.push(new Handler(this.container));
     });
 
+    this.container.handlerService.memberRemoveHandlers.forEach((Handler) => {
+      this._memberRemoveHandlers.push(new Handler(this.container));
+    });
+
     this.container.handlerService.reactionHandlers.forEach((Handler) => {
       this._reactionHandlers.push(new Handler(this.container));
     });
@@ -194,12 +232,14 @@ export class Listener {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async _executeHandlers(handlers: IHandler[], ...args: any[]) {
-    handlers.forEach(async (handler: IHandler) => {
-      try {
-        await handler.execute(...args);
-      } catch (e) {
-        this.container.loggerService.error(e);
-      }
-    });
+    await Promise.all(
+      handlers.map(async (handler: IHandler) => {
+        try {
+          await handler.execute(...args);
+        } catch (e) {
+          this.container.loggerService.error(e);
+        }
+      })
+    );
   }
 }

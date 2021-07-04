@@ -1,13 +1,13 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
-import { Role, Snowflake } from 'discord.js';
+import { HexColorString, Role, Snowflake } from 'discord.js';
 
 import fs from 'fs';
 
 interface IRoleInfo {
   id: Snowflake;
   name?: string;
-  color?: string;
+  color?: HexColorString;
   remove?: boolean;
 }
 
@@ -20,7 +20,8 @@ interface IRoleUpdateResult {
   newInfo?: IRoleInfo;
 }
 
-export class ManageRolesPlugin extends Plugin {
+export default class ManageRolesPlugin extends Plugin {
+  public commandName: string = 'manageroles';
   public name: string = 'Manage Roles';
   public description: string = 'Manage colors of roles in bulk';
   public usage: string = 'manageroles';
@@ -39,12 +40,12 @@ export class ManageRolesPlugin extends Plugin {
     const [subCommand] = args;
 
     switch (subCommand) {
-    case 'fetch':
-      await this._dumpRolesInfo(message);
-      break;
-    case 'update':
-      await this._updateRoles(message);
-      break;
+      case 'fetch':
+        await this._dumpRolesInfo(message);
+        break;
+      case 'update':
+        await this._updateRoles(message);
+        break;
     }
   }
 

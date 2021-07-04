@@ -6,6 +6,7 @@ import { PoliticsCoCReminder } from '../app/jobs/politicscoc.job';
 import { InactiveVoiceJob } from '../app/jobs/inactivevoice.job';
 import { PollJob } from '../app/jobs/poll.job';
 import { WarningJob } from '../app/jobs/warning.job';
+import { WeatherEventsJob } from '../app/jobs/weatherevents.job';
 
 export class JobService {
   public jobs: Job[] = [
@@ -15,15 +16,16 @@ export class JobService {
     new InactiveVoiceJob(),
     new PollJob(),
     new WarningJob(),
+    new WeatherEventsJob()
   ];
   private _runningJobs: { [jobName: string]: NodeJS.Timeout } = {};
 
-  public async register(job: Job, container: IContainer) {
+  public register(job: Job, container: IContainer) {
     if (this._runningJobs[job.name]) {
       throw new Error(`Job ${job.name} already exists as a running job.`);
     }
-    this._runningJobs[job.name] = setInterval(async () => {
-      return await job.execute(container);
+    this._runningJobs[job.name] = setInterval(() => {
+      return job.execute(container);
     }, job.interval);
   }
 

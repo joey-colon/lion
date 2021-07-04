@@ -22,6 +22,8 @@ import { WarningService } from '../services/warning.service';
 import { TwitterService } from '../services/twitter.service';
 import { GameLeaderboardService } from '../services/gameleaderboard.service';
 import ISlashPlugin from './slash';
+import { UserService } from '../services/user.service';
+import { Document } from 'mongoose';
 
 export interface IConfig {
   token: string;
@@ -36,14 +38,16 @@ export interface IPlugin {
   name: string;
   description: string;
   usage: string;
+  commandName: string;
   pluginAlias?: string[];
   permission: ChannelType;
   pluginChannelName?: string;
   usableInDM?: boolean;
   usableInGuild?: boolean;
   validate(message: IMessage, args: string[]): boolean;
-  hasPermission(message: IMessage | discord.CommandInteraction): boolean;
-  execute(message: IMessage, args?: string[]): Promise<void>;
+  hasPermission(message: IMessage | discord.CommandInteraction): true | string;
+  execute(message: IMessage, args?: string[]): Promise<void> | void;
+  isActive: boolean;
 }
 
 export interface IContainer extends BottleContainer {
@@ -65,6 +69,7 @@ export interface IContainer extends BottleContainer {
   warningService: WarningService;
   twitterService: TwitterService;
   gameLeaderboardService: GameLeaderboardService;
+  userService: UserService;
 }
 
 export interface IMessage extends discord.Message {}
@@ -77,9 +82,10 @@ export interface IChannelCategory {
 
 export interface IChannel extends discord.Collection<discord.Snowflake, discord.GuildChannel> {}
 export interface IHttpResponse extends AxiosResponse {}
+export type Voidable = Promise<void> | void;
 
 export interface IHandler {
-  execute(...args: any[]): Promise<void>;
+  execute(...args: any[]): Voidable;
 }
 
 export enum Mode {
@@ -195,14 +201,16 @@ export interface IServerInfo {
   name: ServerInfoType;
 }
 
+export type ServerInfoDocument = IServerInfo & Document;
+
 export type ServerInfoType = 'MemberCount';
 
 export type RoleTypeKey = keyof typeof RoleType;
 export type Maybe<T> = T | undefined | null;
 
-export type MessageSendData =  string | discord.APIMessage | (discord.ReplyMessageOptions & { split?: false }) // Discord v13 change
+export type MessageSendData =  string | discord.MessagePayload | (discord.ReplyMessageOptions & { split?: false }); // Discord v13 change
 
-export type MessageEditData = string | discord.APIMessage;
+export type MessageEditData = string | discord.MessagePayload;
 
 export function isSlashCommand(plugin: unknown): boolean {
   return (plugin as ISlashPlugin).parameters !== undefined;

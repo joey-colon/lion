@@ -1,13 +1,14 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, MessageOptions } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 
-export class DogPlugin extends Plugin {
+export default class DogPlugin extends Plugin {
+  public commandName: string = 'dog';
   public name: string = 'Dog Plugin';
   public description: string = 'Generates pictures of doggos.';
   public usage: string =
-  'dog <subreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
+  'dog <subbreed (Optional)>  <breed (Optional)> | dog listBreeds | dog listSubBreeds <breed (Optional)>';
   public pluginAlias = ['dogs', 'doggo'];
   public permission: ChannelType = ChannelType.Public;
   public pluginChannelName: string = Constants.Channels.Public.Pets;
@@ -54,13 +55,13 @@ export class DogPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const breed = this._parseInput(args || []);
+    const breed = this._parseInput(args ?? []);
 
     if (breed.startsWith('listsubbreeds')) {
       const breedType = breed.replace('listsubbreeds', '').trim();
 
       if (!breedType) {
-        await message.reply(this._makeSubBreedEmbed());
+        await message.reply({ embeds: [this._makeSubBreedEmbed()] });
         return;
       }
 
@@ -71,12 +72,12 @@ export class DogPlugin extends Plugin {
     }
 
     if (breed.startsWith('listbreeds')) {
-      await message.reply(this._makeBreedEmbed());
+      await message.reply({ embeds: [this._makeBreedEmbed()] });
       return;
     }
 
     // The breed and subbreed is reversed for lookup
-    const searchBreed = this._parseInput(args?.reverse() || []).replace(' ', '/');
+    const searchBreed = this._parseInput(args?.reverse() ?? []).replace(' ', '/');
     let url = `breed/${searchBreed}/images/random`;
 
     if (breed === '' || breed === 'random') {
@@ -113,8 +114,10 @@ export class DogPlugin extends Plugin {
 
         message.reply({
           content: '',
-          files: [response.data.message]
-        })
+          files: [response.data.message],
+          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
+          // the 'name' property doesn't exist in v13.
+        });
       })
       .catch((err) => {
         this.container.loggerService.warn(err);
@@ -147,18 +150,18 @@ export class DogPlugin extends Plugin {
     return (this._subBreedEmbed = embed);
   }
 
-  private _makeSingleSubBreedEmbed(subBreed: string): MessageEmbed | string {
+  private _makeSingleSubBreedEmbed(subBreed: string): MessageOptions & { split?: false } {
     const subBreedData = this._subBreeds.find((e) => e.breed === subBreed)?.subBreed;
 
     if (!subBreedData) {
-      return "This breed doesn't have any sub-breeds.";
+      return { content: "This breed doesn't have any sub-breeds." };
     }
 
     const embed = new MessageEmbed();
     embed.setColor('#0099ff').setTitle(subBreed);
     embed.setDescription(subBreedData.join('\n'));
 
-    return embed;
+    return { embeds: [embed] };
   }
 
   private _parseInput(args: string[]): string {

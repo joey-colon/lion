@@ -1,7 +1,8 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType } from '../../common/types';
 
-export class DeleteClassChannelsPlugin extends Plugin {
+export default class DeleteClassChannelsPlugin extends Plugin {
+  public commandName: string = 'delclasschans';
   public name: string = 'Delete classes';
   public description: string = "Nukes every class channel. Don't be idiot";
   public usage: string = 'delclasschans [super secret password]';
@@ -14,7 +15,7 @@ export class DeleteClassChannelsPlugin extends Plugin {
     super();
   }
 
-  public async execute(message: IMessage, args: string[]) {
+  public async execute(message: IMessage) {
     const channels = this.container.guildService
       .get()
       .channels.cache.filter((chan) => chan.type === 'text' && !!chan.name.match(this._CHAN_NAME));
@@ -23,7 +24,7 @@ export class DeleteClassChannelsPlugin extends Plugin {
 
     await message.reply(`Deleting **${numChannels}** channels at request of **${deleteCaller}**`);
 
-    channels.forEach((channel, _) => {
+    channels.forEach((channel) => {
       channel.delete();
     });
   }

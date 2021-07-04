@@ -2,9 +2,10 @@ import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IHttpResponse, IMessage, Maybe } from '../../common/types';
 import { Guild, MessageEmbed } from 'discord.js';
-import * as moment from 'moment';
+import ms from 'ms';
 
-export class PubSubPlugin extends Plugin {
+export default class PubSubPlugin extends Plugin {
+  public commandName: string = 'pubsub';
   public name: string = 'Pub Sub Plugin';
   public description: string = 'Get prices and steamy pictures of the subs you need in your life.';
   public usage: string = 'pubSub <subName (optional)> | <"list" | "types" (optional)>';
@@ -18,7 +19,7 @@ export class PubSubPlugin extends Plugin {
   private _SUBS: string[] = [];
   private _EMBED_LIST = new MessageEmbed();
 
-  private _SUB_UPD_THRESH: number = moment.duration(1, 'days').asMilliseconds();
+  private _SUB_UPD_THRESH: number = ms('1d');
   private _LAST_UPD_TIME: number = 0;
 
   constructor(public container: IContainer) {
@@ -26,7 +27,7 @@ export class PubSubPlugin extends Plugin {
     this._updateData();
   }
 
-  private async _updateData() {
+  private _updateData() {
     this.container.httpService
       .get(`${this._API_URL}/allsubs/`)
       .then((response: IHttpResponse) => {
@@ -38,16 +39,16 @@ export class PubSubPlugin extends Plugin {
   }
 
   public async execute(message: IMessage, args?: string[]) {
-    const input = (args || []).join('-').toLowerCase() || this._DEFAULT_INPUT;
+    const input = (args ?? []).join('-').toLowerCase() || this._DEFAULT_INPUT;
 
     if (input === 'list' || input === 'types') {
       // Simply return the list of supported subs
-      await message.reply(await this._generateEmbedList());
+      await message.reply({ embeds: [this._generateEmbedList()] });
       return;
     }
 
     // checks that the user entered a sub, otherwise it gets random
-    const subType = this._SUBS.find((sub: string) => sub === input) || 'random';
+    const subType = this._SUBS.find((sub: string) => sub === input) ?? 'random';
 
     // receives the according info and posts
     await this.container.httpService
@@ -61,12 +62,12 @@ export class PubSubPlugin extends Plugin {
         const [subData] = response.data;
         const embed: MessageEmbed = this._generateEmbedSub(subData, message.guild);
 
-        message.reply(embed);
+        message.reply({ embeds: [embed] });
       })
       .catch((err) => this.container.loggerService.warn(err));
   }
 
-  private async _generateEmbedList(): Promise<MessageEmbed> {
+  private _generateEmbedList(): MessageEmbed {
     const lastListUpdate: number = Date.now() - this._LAST_UPD_TIME;
 
     if (lastListUpdate < this._SUB_UPD_THRESH) {
@@ -76,7 +77,7 @@ export class PubSubPlugin extends Plugin {
     this._EMBED_LIST = new MessageEmbed();
     this._LAST_UPD_TIME = Date.now(); // since it only updates once a day, don't need to worry about accuracy
 
-    await this._updateData();
+    this._updateData();
 
     this._EMBED_LIST.addField('Available Subs', this._normalizeName(this._SUBS.join('\n')));
 
@@ -86,7 +87,7 @@ export class PubSubPlugin extends Plugin {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _generateEmbedSub(subData: any, guild: Maybe<Guild>): MessageEmbed {
     const embed: MessageEmbed = new MessageEmbed();
-    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() || '🥪';
+    const pubSubEmoji = guild?.emojis.cache.filter((e) => e.name === 'pubsub').first() ?? '🥪';
 
     subData.sub_name = this._normalizeName(subData.sub_name);
     subData.status = subData.status.toLowerCase() === 'true';
@@ -106,20 +107,20 @@ export class PubSubPlugin extends Plugin {
 
     embed.setDescription(
       `Get your own *${subData.sub_name}* sub, ${saleInfo}.` +
-        ` So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.` +
-        ` Just look at this beauty right here! ` +
+        ' So what are you waiting for?  Come on down to Publix now to get yourself a beautiful sub.' +
+        ' Just look at this beauty right here! ' +
         `😍😍😍${pubSubEmoji}${pubSubEmoji}${pubSubEmoji}🤤🤤🤤`
     );
 
     embed.setImage(subData.image);
 
-    embed.setFooter(`pulled from: pubsub-api.dev.`);
+    embed.setFooter('pulled from: pubsub-api.dev.');
 
     return embed;
   }
 
   public validate(message: IMessage, args?: string[]) {
-    const input = (args || []).join('-').toLowerCase();
+    const input = (args ?? []).join('-').toLowerCase();
 
     const hasKeyword: boolean = this._VALID_KEYS.includes(input);
     const hasSub: boolean = this._SUBS.includes(input);

@@ -3,7 +3,8 @@ import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, Maybe } from '../../common/types';
 import { MessageEmbed, Message } from 'discord.js';
 
-export class MarketPlacePlugin extends Plugin {
+export default class MarketPlacePlugin extends Plugin {
+  public commandName: string = 'marketplace';
   public name: string = 'MarketPlace';
   public description: string = 'Stores and Lists Everything On MarketPlace.';
   public usage: string = 'Market <add/list>';
@@ -14,7 +15,7 @@ export class MarketPlacePlugin extends Plugin {
 
   private _LISTING_PREFIX = '!marketplace add';
   private _ALIAS_PREFIX = '!market add';
-  private _TARGET_REACTION = '💰';
+  private _SOLD_EMOJI = '💰';
   private _MAX_CHAR_LENGTH = 2000;
   private _LINK_PREFIX: Maybe<string> = null;
   private _lastListingPost: Maybe<IMessage> = null;
@@ -39,15 +40,19 @@ export class MarketPlacePlugin extends Plugin {
   private _handleAddMarket(message: IMessage) {
     this.container.messageService.attemptDMUser(
       message,
-      new MessageEmbed().setDescription(
-        `Your item has been added! Please react to your message with ${this._TARGET_REACTION} once it is sold.`
-      )
+      {
+        embeds: [
+          new MessageEmbed().setDescription(
+            `Your item has been added! Please react to your message with ${this._SOLD_EMOJI} once it is sold.`
+          )
+        ]
+      }
     );
   }
 
   private async _handleListMarket(message: IMessage) {
     const oldMessages = await this._fetchMessages(message, 300);
-    const itemsForSale = await this._fetchListings(oldMessages);
+    const itemsForSale = this._fetchListings(oldMessages);
 
     const chunks = [];
     while (itemsForSale.length > 0) {
@@ -73,7 +78,7 @@ export class MarketPlacePlugin extends Plugin {
   }
 
   private _createListingEmbed(chunks: string[][]): MessageEmbed[] {
-    return chunks.map((items, i) => {
+    return chunks.map((items) => {
       const embed = new MessageEmbed();
       embed.setTitle('Items For Sale');
       embed.setColor('#7289da');
@@ -137,18 +142,25 @@ export class MarketPlacePlugin extends Plugin {
     return buffer;
   }
 
-  private async _fetchListings(messages: Message[]): Promise<string[]> {
+  private _fetchListings(messages: Message[]): string[] {
     const calls = messages.filter(
       (msg) =>
         (msg.content.startsWith(this._LISTING_PREFIX) || // Filter out non !market adds
           msg.content.startsWith(this._ALIAS_PREFIX)) &&
-        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._TARGET_REACTION)) // Filter out sold listings
+        !Boolean(msg.reactions.cache.find((r) => r.emoji.name === this._SOLD_EMOJI)) // Filter out sold listings
     );
-    const parsed = calls.map((msg) => this._resolveToListing(msg)); // Turn them into listings
-    return await Promise.all(parsed);
+
+    return calls.reduce((acc: string[], msg) => {
+      const parsed = this._resolveToListing(msg);
+      if (parsed) {
+        acc.push(parsed);
+      }
+
+      return acc;
+    }, []);
   }
 
-  private async _resolveToListing(msg: IMessage) {
+  private _resolveToListing(msg: IMessage): Maybe<string> {
     const { content } = msg;
     const [, item] = content.split('add');
 
@@ -159,6 +171,11 @@ export class MarketPlacePlugin extends Plugin {
     }
 
     const user = msg.author;
+    const isInServer = Boolean(this.container.guildService.get().members.cache.get(user.id));
+    if (!isInServer) {
+      return;
+    }
+
     return `${item}\n ${user.toString()} [Link](${this._getLinkPrefix() + msg.id})`;
   }
 

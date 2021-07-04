@@ -3,7 +3,8 @@ import { IContainer, IMessage, ChannelType } from '../../common/types';
 import Constants from '../../common/constants';
 import { CategoryChannel, Collection, GuildChannel, User } from 'discord.js';
 
-export class ShadowBanPlugin extends Plugin {
+export default class ShadowBanPlugin extends Plugin {
+  public commandName: string = 'shadowban';
   public name: string = 'Shadowban Plugin';
   public description: string = 'Disables a users ability to view public channels.';
   public usage: string = 'shadowban <ban|unban> <user>';
@@ -73,7 +74,7 @@ export class ShadowBanPlugin extends Plugin {
 
   private _banUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.createOverwrite(user.id, {
+      await chan.permissionOverwrites.create(user.id, {
         VIEW_CHANNEL: false,
       });
     };
@@ -81,7 +82,7 @@ export class ShadowBanPlugin extends Plugin {
 
   private _unbanUser(user: User) {
     return async (chan: GuildChannel) => {
-      await chan.permissionOverwrites.get(user.id)?.delete();
+      await chan.permissionOverwrites.cache.get(user.id)?.delete();
     };
   }
 }
