@@ -1,5 +1,5 @@
 import { IMessage, IEmbedData, IReactionOptions } from '../common/types';
-import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User } from 'discord.js';
+import { GuildChannel, Guild, TextChannel, MessageEmbed, MessageReaction, User, MessageOptions } from 'discord.js';
 import { GuildService } from './guild.service';
 import Constants from '../common/constants';
 import { LoggerService } from './logger.service';
@@ -34,7 +34,7 @@ export class MessageService {
     this._sendConstructedReport(report, { files: message.attachments.map((e) => e.url) });
   }
 
-  async attemptDMUser(message: IMessage, content: string | MessageEmbed) {
+  async attemptDMUser(message: IMessage, content: MessageOptions & { split?: false }) {
     try {
       await message.author.send(content).then(async () => await message.react('👍'));
     } catch {
@@ -54,13 +54,14 @@ export class MessageService {
     await Promise.all(embedData.emojiData.map((reaction) => msg.react(reaction.emoji)));
     await msg.react(this._CANCEL_EMOTE); // Makes cancel available on all reactions (We could also make it an option in the future)
 
+    // Only run if its the caller
+    const filter = (reaction: MessageReaction, user: User) => (embedData.emojiData.some((reactionKey) => 
+      reactionKey.emoji === reaction.emoji.name) || reaction.emoji.name === this._CANCEL_EMOTE) && user.id === message.author.id;
+
     // Sets up the listener for reactions
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        (embedData.emojiData.some((reactionKey) => reactionKey.emoji === reaction.emoji.name) ||
-          reaction.emoji.name === this._CANCEL_EMOTE) &&
-        user.id === message.author.id, // Only run if its the caller
       {
+        filter,
         time: ms('2m'),
       } // Listen for 2 Minutes
     );
@@ -128,16 +129,15 @@ export class MessageService {
       e.setFooter(`Page ${i + 1} of ${_pages.length}`)
     );
 
-    const msg: IMessage = await message.channel.send(pages[0]);
+    const msg: IMessage = await message.channel.send({ embeds: [pages[0]] });
     await Promise.all(this._ARROWS.map((a) => msg.react(a)));
 
-    const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        this._ARROWS.includes(reaction.emoji.name) && user.id !== msg.author.id, // Only run if its not the bot putting reacts
-      {
-        time: 1000 * 60 * 10,
-      } // Listen for 10 Minutes
-    );
+    const collector = msg.createReactionCollector({
+      filter: (reaction: MessageReaction, user: User) => (
+        this._ARROWS.includes(reaction.emoji.name!) && user.id !== msg.author.id
+      ),
+      time: 1000 * 60 * 10, // Listen for 10 Minutes
+    });
 
     let pageIndex = 0;
     collector.on('collect', async (reaction: MessageReaction) => {
@@ -146,7 +146,7 @@ export class MessageService {
 
       await reaction.users
         .remove(reaction.users.cache.last()) // Decrement last reaction
-        .then(async () => await msg.edit(pages[pageIndex]));
+        .then(async () => await msg.edit({ embeds: [pages[pageIndex]] }));
     });
 
     // Remove all reactions so user knows its no longer available
@@ -209,7 +209,10 @@ export class MessageService {
     if (!options) {
       this._botReportingChannel?.send(report);
     } else {
-      this._botReportingChannel?.send(report, options);
+      this._botReportingChannel?.send({
+        content: report,
+        ...options,
+      });
     }
   }
 

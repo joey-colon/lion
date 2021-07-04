@@ -29,7 +29,7 @@ export default class StatusPlugin extends Plugin {
     const uptime = this._getUptime();
 
     const embed = this._creatEmbed(latestCommit, numPlugins, uptime);
-    message.reply(embed);
+    message.reply({ embeds: [embed] });
   }
 
   private _creatEmbed(latestCommit: ICommitData, numPluigins: number, startDate: string) {
@@ -44,7 +44,7 @@ export default class StatusPlugin extends Plugin {
     embed.addField('Latest Commit Hash', latestCommit?.number, true);
     embed.addField('Latest Commit Author', latestCommit?.author, true);
     embed.addField('Latest Commit Date', latestCommit?.date, true);
-    embed.addField('Number Of Plugins', numPluigins, true);
+    embed.addField('Number Of Plugins', numPluigins.toString(), true);
     embed.addField('Uptime', startDate, true);
 
     return embed;

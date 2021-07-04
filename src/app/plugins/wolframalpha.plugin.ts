@@ -1,4 +1,4 @@
-import { MessageAttachment, MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed, MessageOptions } from 'discord.js';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage } from '../../common/types';
 import WolframAlphaAPI from 'wolfram-alpha-api';
@@ -45,6 +45,10 @@ export default class WolframAlphaPlugin extends Plugin {
 
     await message.channel.send('Let me think...');
 
+    const options: MessageOptions = {
+      embeds: [embed],
+    };
+
     try {
       if (wantsImage) {
         // put base64 image in an attachment
@@ -54,7 +58,8 @@ export default class WolframAlphaPlugin extends Plugin {
 
         file.setName('image.png');
         embed.setDescription('Answer:');
-        embed.attachFiles([file]).setImage(`attachment://${file.name}`);
+        options.files = [file];
+        embed.setImage(`attachment://${file.name}`);
       } else {
         const answer = await this._waAPI.getShort(question);
         embed.setDescription(`Answer: ${answer}`);
@@ -64,6 +69,6 @@ export default class WolframAlphaPlugin extends Plugin {
     }
 
     // Send embed
-    await message.channel.send(embed);
+    await message.channel.send(options);
   }
 }

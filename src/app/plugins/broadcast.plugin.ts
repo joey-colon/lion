@@ -1,6 +1,6 @@
 import { Plugin } from '../../common/plugin';
 import { IContainer, IMessage, ChannelType, ClassType, Maybe } from '../../common/types';
-import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment } from 'discord.js';
+import { MessageEmbed, TextChannel, GuildChannel, MessageAttachment, ThreadChannel } from 'discord.js';
 import Constants from '../../common/constants';
 
 export default class BroadcastPlugin extends Plugin {
@@ -13,7 +13,7 @@ export default class BroadcastPlugin extends Plugin {
   public permission: ChannelType = ChannelType.Admin;
   public commandPattern: RegExp = /((message|classes)\s.+|attach|confirm|cancel)/;
 
-  private _CHANS_TO_SEND: GuildChannel[] = [];
+  private _CHANS_TO_SEND: (GuildChannel | ThreadChannel)[] = [];
   private _ATTACHMENTS: MessageAttachment[] = [];
   private _ANNOUNCEMENT_CONTENT: Maybe<string> = null;
 
@@ -87,9 +87,9 @@ export default class BroadcastPlugin extends Plugin {
     const [announcementEmbed, attachments] = embeds;
     await Promise.all(
       this._CHANS_TO_SEND.map(async (chan) => {
-        await (chan as TextChannel).send(announcementEmbed);
+        await (chan as TextChannel).send({ embeds: [announcementEmbed] });
         if (attachments) {
-          await (chan as TextChannel).send(attachments);
+          await (chan as TextChannel).send({ files: attachments });
         }
       })
     );
@@ -125,27 +125,27 @@ export default class BroadcastPlugin extends Plugin {
   }
 
   private _reportToUser(message: IMessage) {
-    message.reply(this._createAnnouncement());
+    message.reply({ embeds: (this._createAnnouncement() as MessageEmbed[]) });
     message.reply(
       `You are about to send this announcement to \`${this._CHANS_TO_SEND.length}\` classes... Are you sure?\n` +
         'Respond with `confirm` or `cancel`'
     );
   }
 
-  private _createAnnouncement(): (MessageEmbed | string[])[] {
+  private _createAnnouncement(): [MessageEmbed,  MessageAttachment[]] {
     const embed = new MessageEmbed();
     embed.setTitle('Announcement!');
     embed.setColor('#ffca06');
     embed.setThumbnail(Constants.LionPFP);
-    embed.setDescription(this._ANNOUNCEMENT_CONTENT);
+    embed.setDescription(this._ANNOUNCEMENT_CONTENT ?? '');
 
     if (!this._ATTACHMENTS.length) {
-      return [embed];
+      return [embed, []];
     }
 
     // 2 messages wil be sent, the first being the embed
     // and the next containing all attachments
-    return [embed, this._ATTACHMENTS.map((att) => att.url)];
+    return [embed, this._ATTACHMENTS];
   }
 
   private _getClassesFromClassMap(map: Map<string, GuildChannel>) {

@@ -1,4 +1,4 @@
-import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel } from 'discord.js';
+import { TextChannel, MessageReaction, User, GuildChannel, CategoryChannel, PartialMessage } from 'discord.js';
 import { IContainer, IHandler, IMessage, ClassType } from '../../common/types';
 
 export class ReactHandler implements IHandler {
@@ -38,7 +38,7 @@ export class ReactHandler implements IHandler {
     await this.container.warningService.deleteChan(user.id);
   }
 
-  private _handleClassChannelPinRequest(message: IMessage, channel: TextChannel) {
+  private _handleClassChannelPinRequest(message: IMessage | PartialMessage, channel: TextChannel) {
     if (!this.container.classService.getClasses(ClassType.ALL).has(channel.name)) {
       return;
     }
@@ -50,7 +50,7 @@ export class ReactHandler implements IHandler {
     const onlyPin = (react: MessageReaction) => react.emoji.name === '📌';
 
     message
-      .awaitReactions(onlyPin, { max: this._PIN_THRESH })
+      .awaitReactions({ filter: onlyPin, max: this._PIN_THRESH })
       .then((collection) => {
         const count = collection.first()?.count;
         if (!count) {

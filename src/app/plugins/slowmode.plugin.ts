@@ -38,7 +38,7 @@ export default class SlowModePlugin extends Plugin {
     channels
       .reduce((acc: TextChannel[], cur: string) => {
         const id = cur.replace(/\D/g, '');
-        const channel = this.container.guildService.get().channels.cache.get(id) as TextChannel;
+        const channel = this.container.guildService.get().channels.cache.get(id as `${bigint}`) as TextChannel;
 
         channel && acc.push(channel);
 

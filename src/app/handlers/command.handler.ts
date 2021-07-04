@@ -56,15 +56,18 @@ export class CommandHandler implements types.IHandler {
         `${mostLikelyCommand}${command.args.length ? ' ' : ''}${command.args.join(' ')}\`?`
     );
 
-    const msg = await message.channel.send(embed);
+    const msg = await message.channel.send({ embeds: [embed] });
     await msg.react(this._CHECK_EMOTE);
     await msg.react(this._CANCEL_EMOTE);
 
+    // Only run if its not the bot putting reacts
+    const filter = (reaction: MessageReaction, user: User) =>
+      [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name ?? '') &&
+      user.id !== msg.author.id;
+
     const collector = msg.createReactionCollector(
-      (reaction: MessageReaction, user: User) =>
-        [this._CHECK_EMOTE, this._CANCEL_EMOTE].includes(reaction.emoji.name) &&
-        user.id !== msg.author.id, // Only run if its not the bot putting reacts
       {
+        filter,
         time: ms('10m'),
       } // Listen for 10 Minutes
     );

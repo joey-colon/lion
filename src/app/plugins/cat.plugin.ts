@@ -46,7 +46,10 @@ export default class CatPlugin extends Plugin {
 
     if (args[0].includes('breed')) {
       // Simply return the list of supported breeds
-      await message.reply((this._getListEmbed()) || 'Failed to load breeds.');
+      const embed = this._getListEmbed();
+      const msg = embed ? { embed } : { content: 'Failed to load breeds.' };
+
+      await message.reply(msg);
       return;
     }
 
@@ -70,9 +73,11 @@ export default class CatPlugin extends Plugin {
     await this.container.httpService
       .get(`${this._API_URL}images/search?limit=1${searchCom}`)
       .then((response: IHttpResponse) => {
-        message.reply('', {
+        message.reply({
+          content: '',
           files: [response.data[0].url],
-          name:'image.jpg'
+          // Possible regression from PR https://github.com/cs-discord-at-ucf/lion/pull/486
+          // the 'name' property doesn't exist in v13.
         });
       })
       .catch((err) => this.container.loggerService.warn(err));

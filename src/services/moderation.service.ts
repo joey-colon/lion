@@ -1,4 +1,4 @@
-import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User } from 'discord.js';
+import { Guild, Snowflake, MessageEmbed, GuildChannel, TextChannel, User, MessageOptions } from 'discord.js';
 import mongoose, { Document } from 'mongoose';
 import { StorageService } from './storage.service';
 import { ObjectId } from 'mongodb';
@@ -22,7 +22,7 @@ export namespace Moderation {
 
         // If the lookup didn't work, they may be banned
         // So check banned list
-        const bannedUsers = await guild.fetchBans();
+        const bannedUsers = await guild.bans.fetch();
         const user = bannedUsers.filter((u) => u.user.tag === tag).first();
         return user?.user.id;
       } catch (_) {
@@ -80,7 +80,7 @@ export namespace Moderation {
     public attachments?: string[];
     public timeStr: string;
 
-    constructor(guild: Guild, id: string, description?: string, attachments?: string[]) {
+    constructor(guild: Guild, id: `${bigint}`, description?: string, attachments?: string[]) {
       this.guild = guild.id;
 
       this.user = id;
@@ -139,12 +139,10 @@ export class ModService {
     }
 
     await (userOffenseChan as TextChannel)
-      .send(
-        `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
-        {
-          files: message.attachments.map((a) => a.url),
-        }
-      )
+      .send({
+        content: `:rotating_light::rotating_light: ANON REPORT Ticket ${ticket_id} :rotating_light::rotating_light:\n ${message.content}`,
+        files: message.attachments.map((a) => a.url),
+      })
       .catch((e) => this._loggerService.error(e));
 
     return ticket_id;
@@ -162,7 +160,7 @@ export class ModService {
     }
 
     const [, user_id] = decoded;
-    const user = this._guildService.get().members.cache.get(user_id);
+    const user = this._guildService.get().members.cache.get(user_id as `${bigint}`);
 
     if (!user) {
       this._loggerService.error(
@@ -172,7 +170,8 @@ export class ModService {
     }
 
     await user
-      .send(`Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`, {
+      .send({
+        content: `Response to your anonymous report ticket ${ticket_id}:\n ${message.content}`,
         files: message.attachments.map((a) => a.url),
       })
       .catch((e) => this._loggerService.error(e));
@@ -289,11 +288,11 @@ export class ModService {
   public async getModerationSummary(
     guild: Guild,
     username: string
-  ): Promise<MessageEmbed | string> {
+  ): Promise<MessageOptions> {
     const id = await Moderation.Helpers.resolveUser(guild, username);
 
     if (!id) {
-      return 'No such user found.';
+      return { content: 'No such user found.' };
     }
 
     const reports = await ModerationReportModel.find({ guild: guild.id, user: id });
@@ -319,15 +318,15 @@ export class ModService {
 
     reply.setTitle('Moderation Summary on ' + username);
 
-    reply.addField('Total Reports', reports?.length);
-    reply.addField('Total Warnings', warnings?.length);
+    reply.addField('Total Reports', reports?.length.toString());
+    reply.addField('Total Warnings', warnings?.length.toString());
     reply.addField('Ban Status', banStatus);
     reply.addField('Last warning', lastWarning);
 
     reply.setTimestamp(new Date());
     reply.setColor('#ff3300');
 
-    return reply;
+    return { embeds: [reply] };
   }
 
   public async getFullReport(guild: Guild, user_handle: string) {
@@ -383,7 +382,7 @@ export class ModService {
     return await this._writeDataToFile(data);
   }
 
-  private async _getBanStatus(guild: Guild, id: string): Promise<string> {
+  private async _getBanStatus(guild: Guild, id: Snowflake): Promise<string> {
     const mostRecentBan = await ModerationBanModel.find({ guild: guild.id, user: id })
       .sort({ date: -1 })
       .limit(1) ?? [];
@@ -504,7 +503,8 @@ export class ModService {
       this._loggerService.debug(`Taking channel permissions away in ${channel.name}`);
       acc.push(
         channel
-          .createOverwrite(id, {
+          .permissionOverwrites
+          .create(id, {
             VIEW_CHANNEL: false,
             SEND_MESSAGES: false,
           })

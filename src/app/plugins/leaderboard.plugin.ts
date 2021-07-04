@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import { User, MessageOptions } from 'discord.js';
 import Constants from '../../common/constants';
 import { Plugin } from '../../common/plugin';
 import { ChannelType, IContainer, IMessage, Maybe } from '../../common/types';
@@ -49,20 +49,19 @@ export default class LeaderboardPlugin extends Plugin {
 
     // Give one players leaderboard if no opponent is given
     if (!opponentTwo) {
-      const embed = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
-      await message.channel.send(embed || 'Error getting leaderboards');
-      return;
+      const msg = await this._createOpponentPlayerEmbed(message, opponentOne, gameEnum);
+      await message.channel.send(msg);
     }
 
     const embed = await this._getMatchUpEmbed(opponentOne, opponentTwo, gameEnum);
-    await message.channel.send(embed || 'Error getting leaderboards');
+    message.channel.send(embed);
   }
 
   private async _createOpponentPlayerEmbed(
     message: IMessage,
     opponent: User,
     gameEnum: GameType
-  ) {
+  ): Promise<MessageOptions> {
 
     return this.container.gameLeaderboardService.createMatchupLeaderboardEmbed(
       message.author,
